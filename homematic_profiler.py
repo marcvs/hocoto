@@ -5,6 +5,7 @@
 # pylint: disable=bad-continuation, invalid-name, superfluous-parens
 # pylint: disable=bad-whitespace, mixed-indentation
 # pylint: disable=redefined-outer-name, logging-not-lazy
+# pylint: disable=multiple-statements
 # }}}
 
 
@@ -14,7 +15,10 @@ import datetime
 import json
 import logging
 import configargparse
-from homegear import Homegear
+try:
+    from homegear import Homegear
+except:
+    pass
 
 def parseOptions():# {{{
     '''Parse the commandline options'''
@@ -54,45 +58,155 @@ def eventHandler(eventSource, peerId, channel, variableName, value):
             ";\n     variable name: " + variableName + \
             ";\n     value: " + str(value))
 
-# Global variables
-now = datetime.datetime.now()
-days = {'mon': 'MONDAY',
-        'tue': 'TUESDAY',
-        'wed': 'WEDNESDAY',
-        'thu': 'THURSDAY',
-        'fri': 'FRIDAY',
-        'sat': 'SATURDAY',
-        'sun': 'SUNDAY',
-        'today': now.strftime("%A").upper() }
+def profile_generator(profilename, day_short_name):
+    '''asdf'''
+    # Global variables
+    now = datetime.datetime.now()
+    days = {'mon': 'MONDAY',
+            'tue': 'TUESDAY',
+            'wed': 'WEDNESDAY',
+            'thu': 'THURSDAY',
+            'fri': 'FRIDAY',
+            'sat': 'SATURDAY',
+            'sun': 'SUNDAY',
+            'today': now.strftime("%A").upper() }
+    day_name = days[day_short_name]
+    
+    t_lo    = 17
+    t_med   = 19
+    t_high  = 20
+    t_hottt = 21
+    profiles={}
+    profiles['a']={}
+    profiles['a']['temp']={}
+    profiles['a']['time']={}
+    profiles['a']['temp'][0] = t_lo     ; profiles['a']['time'][0] = 60* 16 + 0
+    profiles['a']['temp'][1] = t_high   ; profiles['a']['time'][1] = 60* 24 + 0
+    profiles['a']['temp'][2] = t_lo     ; profiles['a']['time'][2] = 60* 24 + 0
+    profiles['a']['temp'][3] = t_lo     ; profiles['a']['time'][3] = 60* 24 + 0
+    profiles['a']['temp'][4] = t_lo     ; profiles['a']['time'][4] = 60* 24 + 0
+    profiles['a']['temp'][5] = t_lo     ; profiles['a']['time'][5] = 60* 24 + 0
+    profiles['a']['temp'][6] = t_lo     ; profiles['a']['time'][6] = 60* 24 + 0
+    profiles['a']['temp'][7] = t_lo     ; profiles['a']['time'][7] = 60* 24 + 0
+    profiles['a']['temp'][8] = t_lo     ; profiles['a']['time'][8] = 60* 24 + 0
+    profiles['a']['temp'][9] = t_lo     ; profiles['a']['time'][9] = 60* 24 + 0
+    profiles['a']['temp'][10]= t_lo     ; profiles['a']['time'][10]= 60* 24 + 0
+    profiles['a']['temp'][11]= t_lo     ; profiles['a']['time'][11]= 60* 24 + 0
+    profiles['a']['temp'][12]= t_lo     ; profiles['a']['time'][12]= 60* 24 + 0
+    profiles['a']['temp'][13]= t_lo     ; profiles['a']['time'][13]= 60* 24 + 0
 
-params={}
+    profiles['ma']={}
+    profiles['ma']['temp']={}
+    profiles['ma']['time']={}
+    profiles['ma']['temp'][0] = t_lo     ; profiles['ma']['time'][0] = 60*  6 + 30
+    profiles['ma']['temp'][1] = t_high   ; profiles['ma']['time'][1] = 60*  9 + 0
+    profiles['ma']['temp'][2] = t_lo     ; profiles['ma']['time'][2] = 60* 16 + 0
+    profiles['ma']['temp'][3] = t_high   ; profiles['ma']['time'][3] = 60* 24 + 0
+    profiles['ma']['temp'][4] = t_lo     ; profiles['ma']['time'][4] = 60* 24 + 0
+    profiles['ma']['temp'][5] = t_lo     ; profiles['ma']['time'][5] = 60* 24 + 0
+    profiles['ma']['temp'][6] = t_lo     ; profiles['ma']['time'][6] = 60* 24 + 0
+    profiles['ma']['temp'][7] = t_lo     ; profiles['ma']['time'][7] = 60* 24 + 0
+    profiles['ma']['temp'][8] = t_lo     ; profiles['ma']['time'][8] = 60* 24 + 0
+    profiles['ma']['temp'][9] = t_lo     ; profiles['ma']['time'][9] = 60* 24 + 0
+    profiles['ma']['temp'][10]= t_lo     ; profiles['ma']['time'][10]= 60* 24 + 0
+    profiles['ma']['temp'][11]= t_lo     ; profiles['ma']['time'][11]= 60* 24 + 0
+    profiles['ma']['temp'][12]= t_lo     ; profiles['ma']['time'][12]= 60* 24 + 0
+    profiles['ma']['temp'][13]= t_lo     ; profiles['ma']['time'][13]= 60* 24 + 0
 
-params["TEMPERATURE_MONDAY_2"]= 13
-params["TEMPERATURE_MONDAY_3"]= 12
+    profiles['fma']={}
+    profiles['fma']['temp']={}
+    profiles['fma']['time']={}
+    profiles['fma']['temp'][0] = t_lo     ; profiles['fma']['time'][0] = 60*  5 + 30
+    profiles['fma']['temp'][1] = t_high   ; profiles['fma']['time'][1] = 60*  9 + 0
+    profiles['fma']['temp'][2] = t_lo     ; profiles['fma']['time'][2] = 60* 16 + 0
+    profiles['fma']['temp'][3] = t_high   ; profiles['fma']['time'][3] = 60* 23 + 30
+    profiles['fma']['temp'][4] = t_lo     ; profiles['fma']['time'][4] = 60* 24 + 0
+    profiles['fma']['temp'][5] = t_lo     ; profiles['fma']['time'][5] = 60* 24 + 0
+    profiles['fma']['temp'][6] = t_lo     ; profiles['fma']['time'][6] = 60* 24 + 0
+    profiles['fma']['temp'][7] = t_lo     ; profiles['fma']['time'][7] = 60* 24 + 0
+    profiles['fma']['temp'][8] = t_lo     ; profiles['fma']['time'][8] = 60* 24 + 0
+    profiles['fma']['temp'][9] = t_lo     ; profiles['fma']['time'][9] = 60* 24 + 0
+    profiles['fma']['temp'][10]= t_lo     ; profiles['fma']['time'][10]= 60* 24 + 0
+    profiles['fma']['temp'][11]= t_lo     ; profiles['fma']['time'][11]= 60* 24 + 0
+    profiles['fma']['temp'][12]= t_lo     ; profiles['fma']['time'][12]= 60* 24 + 0
+    profiles['fma']['temp'][13]= t_lo     ; profiles['fma']['time'][13]= 60* 24 + 0
 
-day = "TEMPERATURE_MONDAY_4"
-temp= 11
-params[day] = temp
+    profiles['t']={}
+    profiles['t']['temp']={}
+    profiles['t']['time']={}
+    profiles['t']['temp'][0] = t_lo     ; profiles['t']['time'][0] = 60*  8 + 0
+    profiles['t']['temp'][1] = t_high   ; profiles['t']['time'][1] = 60* 18 + 0
+    profiles['t']['temp'][2] = t_lo     ; profiles['t']['time'][2] = 60* 24 + 0
+    profiles['t']['temp'][3] = t_lo     ; profiles['t']['time'][3] = 60* 24 + 0
+    profiles['t']['temp'][4] = t_lo     ; profiles['t']['time'][4] = 60* 24 + 0
+    profiles['t']['temp'][5] = t_lo     ; profiles['t']['time'][5] = 60* 24 + 0
+    profiles['t']['temp'][6] = t_lo     ; profiles['t']['time'][6] = 60* 24 + 0
+    profiles['t']['temp'][7] = t_lo     ; profiles['t']['time'][7] = 60* 24 + 0
+    profiles['t']['temp'][8] = t_lo     ; profiles['t']['time'][8] = 60* 24 + 0
+    profiles['t']['temp'][9] = t_lo     ; profiles['t']['time'][9] = 60* 24 + 0
+    profiles['t']['temp'][10]= t_lo     ; profiles['t']['time'][10]= 60* 24 + 0
+    profiles['t']['temp'][11]= t_lo     ; profiles['t']['time'][11]= 60* 24 + 0
+    profiles['t']['temp'][12]= t_lo     ; profiles['t']['time'][12]= 60* 24 + 0
+    profiles['t']['temp'][13]= t_lo     ; profiles['t']['time'][13]= 60* 24 + 0
 
-day_num = 5
-day_name = "MONDAY"
+    profiles['ta']={}
+    profiles['ta']['temp']={}
+    profiles['ta']['time']={}
+    profiles['ta']['temp'][0] = t_lo     ; profiles['ta']['time'][0] = 60*  8 + 0
+    profiles['ta']['temp'][1] = t_high   ; profiles['ta']['time'][1] = 60* 23 + 30
+    profiles['ta']['temp'][2] = t_lo     ; profiles['ta']['time'][2] = 60* 16 + 0
+    profiles['ta']['temp'][3] = t_lo     ; profiles['ta']['time'][3] = 60* 24 + 0
+    profiles['ta']['temp'][4] = t_lo     ; profiles['ta']['time'][4] = 60* 24 + 0
+    profiles['ta']['temp'][5] = t_lo     ; profiles['ta']['time'][5] = 60* 24 + 0
+    profiles['ta']['temp'][6] = t_lo     ; profiles['ta']['time'][6] = 60* 24 + 0
+    profiles['ta']['temp'][7] = t_lo     ; profiles['ta']['time'][7] = 60* 24 + 0
+    profiles['ta']['temp'][8] = t_lo     ; profiles['ta']['time'][8] = 60* 24 + 0
+    profiles['ta']['temp'][9] = t_lo     ; profiles['ta']['time'][9] = 60* 24 + 0
+    profiles['ta']['temp'][10]= t_lo     ; profiles['ta']['time'][10]= 60* 24 + 0
+    profiles['ta']['temp'][11]= t_lo     ; profiles['ta']['time'][11]= 60* 24 + 0
+    profiles['ta']['temp'][12]= t_lo     ; profiles['ta']['time'][12]= 60* 24 + 0
+    profiles['ta']['temp'][13]= t_lo     ; profiles['ta']['time'][13]= 60* 24 + 0
 
-params["TEMPERATURE_%s_%d"%(day_name, day_num)] = 10
-
-profiles={}
-profiles['fma'] = params
-profiles['ma'] = params
-
-print ('params:')
-print (json.dumps(params, sort_keys=True, indent=4, separators=(',', ': ')))
-
-print ('profiles:')
-print (json.dumps(profiles, sort_keys=True, indent=4, separators=(',', ': ')))
+    params={}
+    for i in range(1,13):
+        params["TEMPERATURE_%s_%d"%(day_name, i)] = profiles[profilename]['temp'][i-1]
+        params["ENDTIME_%s_%d"%(day_name, i)]     = profiles[profilename]['time'][i-1]
+    return(params)
 
 
-print ("Type: %s" % type(days))
-print ("day: %s" % days['tue'])
-print ("day: %s" % days['today'])
+
+profile = profile_generator('ma', 'fri')
+print (json.dumps(profile, sort_keys=True, indent=4, separators=(',', ': ')))
+print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
+
+# params={}
+#
+# params["TEMPERATURE_MONDAY_2"]= 13
+# params["TEMPERATURE_MONDAY_3"]= 12
+#
+# day = "TEMPERATURE_MONDAY_4"
+# temp= 11
+# params[day] = temp
+#
+# day_num = 5
+# day_name = "MONDAY"
+#
+# params["TEMPERATURE_%s_%d"%(day_name, day_num)] = 10
+#
+# profiles={}
+# profiles['fma'] = params
+# profiles['ma'] = params
+#
+# print ('params:')
+# print (json.dumps(params, sort_keys=True, indent=4, separators=(',', ': ')))
+#
+# print ('profiles:')
+# print (json.dumps(profiles, sort_keys=True, indent=4, separators=(',', ': ')))
+#
+#
+# print ("Type: %s" % type(days))
+# print ("day: %s" % days['tue'])
+# print ("day: %s" % days['today'])
 exit(0)
 
 
