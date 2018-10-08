@@ -181,66 +181,26 @@ def profile_generator(profilename, day_short_name):# {{{
     return(params)
 # }}}
 
-
-
-profile = profile_generator('ma', 'fri')
-print (json.dumps(profile, sort_keys=True, indent=4, separators=(',', ': ')))
-print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
-
-# params={}
-#
-# params["TEMPERATURE_MONDAY_2"]= 13
-# params["TEMPERATURE_MONDAY_3"]= 12
-#
-# day = "TEMPERATURE_MONDAY_4"
-# temp= 11
-# params[day] = temp
-#
-# day_num = 5
-# day_name = "MONDAY"
-#
-# params["TEMPERATURE_%s_%d"%(day_name, day_num)] = 10
-#
-# profiles={}
-# profiles['fma'] = params
-# profiles['ma'] = params
-#
-# print ('params:')
-# print (json.dumps(params, sort_keys=True, indent=4, separators=(',', ': ')))
-#
-# print ('profiles:')
-# print (json.dumps(profiles, sort_keys=True, indent=4, separators=(',', ': ')))
-#
-#
-# print ("Type: %s" % type(days))
-# print ("day: %s" % days['tue'])
-# print ("day: %s" % days['today'])
-exit(0)
-
-
-
-
+################## MAIN ########################
 (args, parser) = parseOptions()
 
+# Setup logging
 logformat = "{%(asctime)s %(filename)s:%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
 loglevel = logging.getLevelName(args.loglevel.upper())
 logging.basicConfig(level=loglevel, format=logformat, filename=args.logfile)
-logging.debug('\n\n\ntest- v.0.0.1')
+logging.debug('\nhomematirc_profiler- v.0.0.2')
 
-logging.info(parser.format_values())
+# logging.info(parser.format_values())
 
-# input_data = sys.stdin.read()
-# logging.info(input_data)
-
+profile = profile_generator(args.mode, args.day)
+if args.verbose:
+    print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
 
 
 hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
 
 # in_params = hg.getParamset(1, 0, "MASTER")
-
-
 # setattr(params, "TEMPERATURE_MONDAY_4", 11)
-# print (str(params))
 
 hg.putParamset(args.device, 0, "MASTER", profile)
 
