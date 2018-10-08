@@ -22,6 +22,14 @@ except:
 
 def parseOptions():# {{{
     '''Parse the commandline options'''
+# | ID | Name                      | Address | Serial     | Type | Type String |
+# |----+---------------------------+---------+------------+------+-------------|
+# | 1  | HM Entkleide OEQ1718409   | 63A25E  | OEQ1718409 | 095  | HM-CC-RT-DN |
+# | 2  | HM Wohnzimmer OEQ1711775  | 638586  | OEQ1711775 | 095  | HM-CC-RT-DN |
+# | 3  | HM Kueche vorn OEQ1711363 | 638718  | OEQ1711363 | 095  | HM-CC-RT-DN |
+# | 4  | HM Kueche hinten  OEQ1... | 63A260  | OEQ1718411 | 095  | HM-CC-RT-DN |
+# | 5  | HM Gaestezimmer OEQ171... | 63A278  | OEQ1718437 | 095  | HM-CC-RT-DN |
+# | 6  | HM Bad OEQ1718406         | 63A255  | OEQ1718406 | 095  | HM-CC-RT-DN |
 
     path_of_executable = os.path.realpath(sys.argv[0])
     folder_of_executable = os.path.split(path_of_executable)[0]
@@ -46,8 +54,7 @@ def parseOptions():# {{{
     print(parser.format_values())
     return args, parser
 #}}}
-
-def eventHandler(eventSource, peerId, channel, variableName, value):
+def eventHandler(eventSource, peerId, channel, variableName, value):# {{{
     # This callback method is called on Homegear variable changes
     '''event handler'''
     # Note that the event handler is called by a different thread than the main thread. I. e. thread synchronization is
@@ -57,9 +64,9 @@ def eventHandler(eventSource, peerId, channel, variableName, value):
             ";\n     channel: " + str(channel) + \
             ";\n     variable name: " + variableName + \
             ";\n     value: " + str(value))
-
-def profile_generator(profilename, day_short_name):
-    '''asdf'''
+# }}}
+def profile_generator(profilename, day_short_name):# {{{
+    '''Generate profiles for given weekday'''
     # Global variables
     now = datetime.datetime.now()
     days = {'mon': 'MONDAY',
@@ -98,10 +105,10 @@ def profile_generator(profilename, day_short_name):
     profiles['ma']={}
     profiles['ma']['temp']={}
     profiles['ma']['time']={}
-    profiles['ma']['temp'][0] = t_lo     ; profiles['ma']['time'][0] = 60*  6 + 30
-    profiles['ma']['temp'][1] = t_high   ; profiles['ma']['time'][1] = 60*  9 + 0
+    profiles['ma']['temp'][0] = t_lo     ; profiles['ma']['time'][0] = 60*  6 + 0
+    profiles['ma']['temp'][1] = t_high   ; profiles['ma']['time'][1] = 60*  8 + 0
     profiles['ma']['temp'][2] = t_lo     ; profiles['ma']['time'][2] = 60* 16 + 0
-    profiles['ma']['temp'][3] = t_high   ; profiles['ma']['time'][3] = 60* 24 + 0
+    profiles['ma']['temp'][3] = t_med    ; profiles['ma']['time'][3] = 60* 23 + 0
     profiles['ma']['temp'][4] = t_lo     ; profiles['ma']['time'][4] = 60* 24 + 0
     profiles['ma']['temp'][5] = t_lo     ; profiles['ma']['time'][5] = 60* 24 + 0
     profiles['ma']['temp'][6] = t_lo     ; profiles['ma']['time'][6] = 60* 24 + 0
@@ -116,11 +123,11 @@ def profile_generator(profilename, day_short_name):
     profiles['fma']={}
     profiles['fma']['temp']={}
     profiles['fma']['time']={}
-    profiles['fma']['temp'][0] = t_lo     ; profiles['fma']['time'][0] = 60*  5 + 30
+    profiles['fma']['temp'][0] = t_lo     ; profiles['fma']['time'][0] = 60*  5 + 00
     profiles['fma']['temp'][1] = t_high   ; profiles['fma']['time'][1] = 60*  9 + 0
-    profiles['fma']['temp'][2] = t_lo     ; profiles['fma']['time'][2] = 60* 16 + 0
-    profiles['fma']['temp'][3] = t_high   ; profiles['fma']['time'][3] = 60* 23 + 30
-    profiles['fma']['temp'][4] = t_lo     ; profiles['fma']['time'][4] = 60* 24 + 0
+    profiles['fma']['temp'][2] = t_lo     ; profiles['fma']['time'][2] = 60* 17 + 0
+    profiles['fma']['temp'][3] = t_med    ; profiles['fma']['time'][3] = 60* 21 + 00
+    profiles['fma']['temp'][4] = t_high   ; profiles['fma']['time'][4] = 60* 23 + 0
     profiles['fma']['temp'][5] = t_lo     ; profiles['fma']['time'][5] = 60* 24 + 0
     profiles['fma']['temp'][6] = t_lo     ; profiles['fma']['time'][6] = 60* 24 + 0
     profiles['fma']['temp'][7] = t_lo     ; profiles['fma']['time'][7] = 60* 24 + 0
@@ -135,8 +142,8 @@ def profile_generator(profilename, day_short_name):
     profiles['t']['temp']={}
     profiles['t']['time']={}
     profiles['t']['temp'][0] = t_lo     ; profiles['t']['time'][0] = 60*  8 + 0
-    profiles['t']['temp'][1] = t_high   ; profiles['t']['time'][1] = 60* 18 + 0
-    profiles['t']['temp'][2] = t_lo     ; profiles['t']['time'][2] = 60* 24 + 0
+    profiles['t']['temp'][1] = t_high   ; profiles['t']['time'][1] = 60* 10 + 0
+    profiles['t']['temp'][2] = t_med    ; profiles['t']['time'][2] = 60* 18 + 0
     profiles['t']['temp'][3] = t_lo     ; profiles['t']['time'][3] = 60* 24 + 0
     profiles['t']['temp'][4] = t_lo     ; profiles['t']['time'][4] = 60* 24 + 0
     profiles['t']['temp'][5] = t_lo     ; profiles['t']['time'][5] = 60* 24 + 0
@@ -153,8 +160,8 @@ def profile_generator(profilename, day_short_name):
     profiles['ta']['temp']={}
     profiles['ta']['time']={}
     profiles['ta']['temp'][0] = t_lo     ; profiles['ta']['time'][0] = 60*  8 + 0
-    profiles['ta']['temp'][1] = t_high   ; profiles['ta']['time'][1] = 60* 23 + 30
-    profiles['ta']['temp'][2] = t_lo     ; profiles['ta']['time'][2] = 60* 16 + 0
+    profiles['ta']['temp'][1] = t_med    ; profiles['ta']['time'][1] = 60* 19 + 30
+    profiles['ta']['temp'][2] = t_high   ; profiles['ta']['time'][2] = 60* 23 + 50
     profiles['ta']['temp'][3] = t_lo     ; profiles['ta']['time'][3] = 60* 24 + 0
     profiles['ta']['temp'][4] = t_lo     ; profiles['ta']['time'][4] = 60* 24 + 0
     profiles['ta']['temp'][5] = t_lo     ; profiles['ta']['time'][5] = 60* 24 + 0
@@ -172,6 +179,7 @@ def profile_generator(profilename, day_short_name):
         params["TEMPERATURE_%s_%d"%(day_name, i)] = profiles[profilename]['temp'][i-1]
         params["ENDTIME_%s_%d"%(day_name, i)]     = profiles[profilename]['time'][i-1]
     return(params)
+# }}}
 
 
 
@@ -226,14 +234,6 @@ logging.info(parser.format_values())
 
 
 
-# | ID | Name                      | Address | Serial     | Type | Type String |
-# |----+---------------------------+---------+------------+------+-------------|
-# | 1  | HM Entkleide OEQ1718409   | 63A25E  | OEQ1718409 | 095 | HM-CC-RT-DN |
-# | 2  | HM Wohnzimmer OEQ1711775  | 638586  | OEQ1711775 | 095 | HM-CC-RT-DN |
-# | 3  | HM Kueche vorn OEQ1711363 | 638718  | OEQ1711363 | 095 | HM-CC-RT-DN |
-# | 4  | HM Kueche hinten  OEQ1... | 63A260  | OEQ1718411 | 095 | HM-CC-RT-DN |
-# | 5  | HM Gaestezimmer OEQ171... | 63A278  | OEQ1718437 | 095 | HM-CC-RT-DN |
-# | 6  | HM Bad OEQ1718406         | 63A255  | OEQ1718406 | 095 | HM-CC-RT-DN |
 hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
 
 # in_params = hg.getParamset(1, 0, "MASTER")
@@ -242,5 +242,5 @@ hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
 # setattr(params, "TEMPERATURE_MONDAY_4", 11)
 # print (str(params))
 
-# hg.putParamset(1,0, "MASTER", params)
+hg.putParamset(args.device, 0, "MASTER", profile)
 
