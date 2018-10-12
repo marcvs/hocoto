@@ -102,35 +102,35 @@ def profile_generator(profilename, day_short_name):# {{{
         profiles[apn]['temp']={}
         profiles[apn]['time']={}
         for i in range (0,13):
-            profiles[apn]['temp'][i] = t_lo     ; profiles[apn]['time'][i] = 60* 24 + 0
+            profiles[apn]['temp'][i] = t_lo   ; profiles[apn]['time'][i] = 60* 24 + 0
 
 
-    profiles['a']['temp'][0] = t_lo     ; profiles['a']['time'][0] = 60* 16 + 0
-    profiles['a']['temp'][1] = t_high   ; profiles['a']['time'][1] = 60* 24 + 0
-    profiles['a']['temp'][2] = t_lo     ; profiles['a']['time'][2] = 60* 24 + 0
+    profiles['a']['temp'][0]   = t_lo   ; profiles['a']['time'][0]   = 60* 16 + 0
+    profiles['a']['temp'][1]   = t_high ; profiles['a']['time'][1]   = 60* 24 + 0
+    profiles['a']['temp'][2]   = t_lo   ; profiles['a']['time'][2]   = 60* 24 + 0
 
-    profiles['ma']['temp'][0] = t_lo     ; profiles['ma']['time'][0] = 60*  6 + 0
-    profiles['ma']['temp'][1] = t_high   ; profiles['ma']['time'][1] = 60*  8 + 0
-    profiles['ma']['temp'][2] = t_lo     ; profiles['ma']['time'][2] = 60* 16 + 0
-    profiles['ma']['temp'][3] = t_med    ; profiles['ma']['time'][3] = 60* 23 + 0
-    profiles['ma']['temp'][4] = t_lo     ; profiles['ma']['time'][4] = 60* 24 + 0
+    profiles['ma']['temp'][0]  = t_lo   ; profiles['ma']['time'][0]  = 60*  6 + 0
+    profiles['ma']['temp'][1]  = t_high ; profiles['ma']['time'][1]  = 60*  8 + 0
+    profiles['ma']['temp'][2]  = t_lo   ; profiles['ma']['time'][2]  = 60* 16 + 0
+    profiles['ma']['temp'][3]  = t_med  ; profiles['ma']['time'][3]  = 60* 23 + 0
+    profiles['ma']['temp'][4]  = t_lo   ; profiles['ma']['time'][4]  = 60* 24 + 0
 
-    profiles['fma']['temp'][0] = t_lo     ; profiles['fma']['time'][0] = 60*  5 + 00
-    profiles['fma']['temp'][1] = t_high   ; profiles['fma']['time'][1] = 60*  9 + 0
-    profiles['fma']['temp'][2] = t_lo     ; profiles['fma']['time'][2] = 60* 17 + 0
-    profiles['fma']['temp'][3] = t_med    ; profiles['fma']['time'][3] = 60* 21 + 00
-    profiles['fma']['temp'][4] = t_high   ; profiles['fma']['time'][4] = 60* 23 + 0
-    profiles['fma']['temp'][5] = t_lo     ; profiles['fma']['time'][5] = 60* 24 + 0
+    profiles['fma']['temp'][0] = t_lo   ; profiles['fma']['time'][0] = 60*  5 + 00
+    profiles['fma']['temp'][1] = t_high ; profiles['fma']['time'][1] = 60*  9 + 0
+    profiles['fma']['temp'][2] = t_lo   ; profiles['fma']['time'][2] = 60* 17 + 0
+    profiles['fma']['temp'][3] = t_med  ; profiles['fma']['time'][3] = 60* 21 + 00
+    profiles['fma']['temp'][4] = t_high ; profiles['fma']['time'][4] = 60* 23 + 0
+    profiles['fma']['temp'][5] = t_lo   ; profiles['fma']['time'][5] = 60* 24 + 0
 
-    profiles['t']['temp'][0] = t_lo     ; profiles['t']['time'][0] = 60*  8 + 0
-    profiles['t']['temp'][1] = t_high   ; profiles['t']['time'][1] = 60* 10 + 0
-    profiles['t']['temp'][2] = t_med    ; profiles['t']['time'][2] = 60* 18 + 0
-    profiles['t']['temp'][3] = t_lo     ; profiles['t']['time'][3] = 60* 24 + 0
+    profiles['t']['temp'][0]   = t_lo   ; profiles['t']['time'][0]   = 60*  8 + 0
+    profiles['t']['temp'][1]   = t_high ; profiles['t']['time'][1]   = 60* 10 + 0
+    profiles['t']['temp'][2]   = t_med  ; profiles['t']['time'][2]   = 60* 18 + 0
+    profiles['t']['temp'][3]   = t_lo   ; profiles['t']['time'][3]   = 60* 24 + 0
 
-    profiles['ta']['temp'][0] = t_lo     ; profiles['ta']['time'][0] = 60*  8 + 0
-    profiles['ta']['temp'][1] = t_med    ; profiles['ta']['time'][1] = 60* 19 + 30
-    profiles['ta']['temp'][2] = t_high   ; profiles['ta']['time'][2] = 60* 23 + 50
-    profiles['ta']['temp'][3] = t_lo     ; profiles['ta']['time'][3] = 60* 24 + 0
+    profiles['ta']['temp'][0]  = t_lo   ; profiles['ta']['time'][0]  = 60*  8 + 0
+    profiles['ta']['temp'][1]  = t_med  ; profiles['ta']['time'][1]  = 60* 19 + 30
+    profiles['ta']['temp'][2]  = t_high ; profiles['ta']['time'][2]  = 60* 23 + 50
+    profiles['ta']['temp'][3]  = t_lo   ; profiles['ta']['time'][3]  = 60* 24 + 0
 
     params={}
     for i in range(0,13):
