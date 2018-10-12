@@ -56,7 +56,7 @@ def parseOptions():# {{{
     parser.add_argument('--profile_name',  '--mode',            choices = allowed_profile_names)
     parser.add_argument('--put',           action='store_true', default=False)
     parser.add_argument('--get',           action='store_true', default=False)
-    parser.add_argument('--db_file',       default='homematic_profile.db')
+    parser.add_argument('--db-file',       default='homematic_profile.db')
     parser.add_argument('--t-lo',          type=float,            default=17)
     parser.add_argument('--t-med',         type=float,            default=18)
     parser.add_argument('--t-high',        type=float,            default=20)
