@@ -12,13 +12,17 @@
 import sys
 import os
 import datetime
+import sqlite3
 import json
 import logging
 import configargparse
+
+dry_run = False
 try:
     from homegear import Homegear
 except:
-    pass
+    print ('homegear python module not found; running in dry profile_name')
+    dry_run = True
 
 def parseOptions():# {{{
     '''Parse the commandline options'''
@@ -48,10 +52,13 @@ def parseOptions():# {{{
     parser.add_argument('--loglevel',                      default='debug')
     parser.add_argument('--device', type=int)
     parser.add_argument('--day', choices = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"])
-    parser.add_argument('--mode', choices = ["fma", "ma", "t", "ta", "a"])
+    parser.add_argument('--profile_name', '--mode', choices = ["fma", "ma", "t", "ta", "a"])
+    parser.add_argument('--put', action='store_true', default=False)
+    parser.add_argument('--get', action='store_true', default=False)
+    parser.add_argument('--db_file', default='homematic_profile.db')
 
     args = parser.parse_args()
-    print(parser.format_values())
+    # print(parser.format_values())
     return args, parser
 #}}}
 def eventHandler(eventSource, peerId, channel, variableName, value):# {{{
@@ -181,8 +188,91 @@ def profile_generator(profilename, day_short_name):# {{{
     return(params)
 # }}}
 
+################### sqlite ##############
+def dict_factory(cursor, row):# {{{
+    '''helper for json export from sqlite'''
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+# }}}
+def init_sqlite_tables(db_file):# {{{
+    '''helper to initialise sql db'''
+    # Setup SQL tables
+    conn = sqlite3.connect(db_file)
+    cur = conn.cursor()
+    try:
+        cur.execute('''create table if not exists hp_device_day_profile_map'''
+            '''(device INTEGER, weekday TEXT, profile TEXT)''')
+        # cur.execute('''create index if not exists name_index ON konto(name)''')
+        conn.commit()
+        conn.close()
+
+    except sqlite3.OperationalError as e:
+        print ("SQL Create error: " + str(e))
+        raise
+    # self.db_was_initialised = True
+# }}}
+def store_entry_in_db(db_file, device, day, profile):# {{{
+    '''Store profile for given weekday and device'''
+    # Setup SQL connection # {{{
+    conn = sqlite3.connect(db_file)
+    conn.row_factory = dict_factory
+    cur = conn.cursor()
+    # }}}
+    # do sqlite query {{{
+    try:
+        query = '''delete from hp_device_day_profile_map where device=%s and weekday='%s' ''' %\
+                (device, day);
+        # print ("Query in store_entry_in_db: " + query)
+        cur.execute(query)
+        conn.commit()
+        query = '''insert into hp_device_day_profile_map values (%d, '%s', '%s')''' %\
+                (device, day, profile)
+        # print ("Query in store_entry_in_db: " + query)
+        cur.execute(query)
+        conn.commit()
+
+    except sqlite3.OperationalError as e:
+        print ("SQL read error: " + str(e))
+        return(False)
+    conn.close()
+    return(True)
+    # }}}
+# }}}
+def read_entry_from_db(db_file, device, day):# {{{
+    '''Read some or all entries from sqlite'''
+    # Setup SQL connection # {{{
+    conn = sqlite3.connect(db_file)
+    conn.row_factory = dict_factory
+    cur = conn.cursor()
+    # }}}
+    # do sqlite query {{{
+    try:
+        query = '''select * from hp_device_day_profile_map where device=%d and weekday='%s' ''' %\
+            (device, day)
+        # print ("Query in read_entry_from_db: " + query)
+        cur.execute(query)
+        conn.commit()
+        allentries = cur.fetchall()
+        if len(allentries) > 1:
+            print ("Warning; Query >>%s<< yielded %d entries; Expected only one. Using last one" %
+                (query, len(allentries)))
+
+    except sqlite3.OperationalError as e:
+        print ("SQL read error: " + str(e))
+    conn.close()
+    # print ("SQL Result: %s" % str(allentries))
+    return (allentries[-1]['profile'])
+    # }}}
+# }}}
+################### /sqlite ##############
+
+
 ################## MAIN ########################
 (args, parser) = parseOptions()
+if dry_run:
+    args.verbose += 1
 
 # Setup logging
 logformat = "{%(asctime)s %(filename)s:%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
@@ -192,15 +282,37 @@ logging.debug('\nhomematirc_profiler- v.0.0.2')
 
 # logging.info(parser.format_values())
 
-profile = profile_generator(args.mode, args.day)
-if args.verbose:
-    print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
+init_sqlite_tables(args.db_file)
 
+if args.put:# {{{
+    # sanity checking:
+    if args.device is None:
+        print("device is not specified but required when using --put")
+        exit(2)
+    if args.day is None:
+        print("day is not specified but required when using --put")
+        exit(2)
+    if args.profile_name is None:
+        print("profile_name is not specified but required when using --put")
+        exit(1)
 
-hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
+    store_entry_in_db(args.db_file, args.device, args.day, args.profile_name)
 
-# in_params = hg.getParamset(1, 0, "MASTER")
-# setattr(params, "TEMPERATURE_MONDAY_4", 11)
+    if not dry_run:
+        hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
 
-hg.putParamset(args.device, 0, "MASTER", profile)
+        # in_params = hg.getParamset(1, 0, "MASTER")
+        # setattr(params, "TEMPERATURE_MONDAY_4", 11)
 
+        hg.putParamset(args.device, 0, "MASTER", args.profile)
+# }}}
+if args.get: # {{{
+    profile_name = read_entry_from_db(args.db_file, args.device, args.day)
+    print (profile_name)
+
+    profile = profile_generator(profile_name, args.day)
+
+    if args.verbose:
+        print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
+
+# }}}
