@@ -38,9 +38,9 @@ def parseOptions():# {{{
     path_of_executable = os.path.realpath(sys.argv[0])
     folder_of_executable = os.path.split(path_of_executable)[0]
 
-    config_files = [os.environ['HOME']+'/.config/ldf-interface.conf',
-                    folder_of_executable + '/ldf-interface.conf',
-                    '/root/configs/ldf-interface.conf']
+    config_files = [os.environ['HOME']+'/.config/homematic-profiler.conf',
+                    folder_of_executable + '/config/homematic-profiler.conf',
+                    '/etc/homematic-profiler.conf']
 
     parser = configargparse.ArgumentParser(
             default_config_files = config_files,
