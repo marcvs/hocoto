@@ -252,6 +252,8 @@ if args.put:# {{{
 
     store_entry_in_db(args.db_file, args.device, args.day, args.profile_name)
 
+    profile = profile_generator(args.profile_name, args.day)
+
     if not dry_run:
         hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
 
