@@ -77,7 +77,7 @@ def eventHandler(eventSource, peerId, channel, variableName, value):# {{{
             ";\n     variable name: " + variableName + \
             ";\n     value: " + str(value))
 # }}}
-def profile_generator(profilename, day_short_name):# {{{
+def profile_generator(profilename, day_short_name, temps):# {{{
     '''Generate profiles for given weekday'''
     now = datetime.datetime.now()
     days = {'mon': 'MONDAY',
@@ -90,10 +90,10 @@ def profile_generator(profilename, day_short_name):# {{{
             'today': now.strftime("%A").upper() }
     day_name = days[day_short_name]
 
-    t_lo    = args.t_lo
-    t_med   = args.t_med
-    t_high  = args.t_high
-    t_hottt = args.t_hottt
+    t_lo    = temps['t_lo']
+    t_med   = temps['t_med']
+    t_high  = temps['t_high']
+    t_hottt = temps['t_hottt']
 
     # initialise profiles:
     profiles={}
@@ -157,8 +157,8 @@ def init_sqlite_tables(db_file):# {{{
     cur = conn.cursor()
     try:
         cur.execute('''create table if not exists hp_device_day_profile_map'''
-            '''(device INTEGER, weekday TEXT, profile TEXT)''')
-        # cur.execute('''create index if not exists name_index ON konto(name)''')
+            '''(device INTEGER, weekday TEXT, profile TEXT,
+            t_lo REAL, t_med REAL, t_high REAL, t_hottt REAL)''')
         conn.commit()
         conn.close()
 
@@ -167,7 +167,7 @@ def init_sqlite_tables(db_file):# {{{
         raise
     # self.db_was_initialised = True
 # }}}
-def store_entry_in_db(db_file, device, day, profile):# {{{
+def store_entry_in_db(db_file, device, day, profile, temps):# {{{
     '''Store profile for given weekday and device'''
     # Setup SQL connection # {{{
     conn = sqlite3.connect(db_file)
@@ -181,8 +181,8 @@ def store_entry_in_db(db_file, device, day, profile):# {{{
         # print ("Query in store_entry_in_db: " + query)
         cur.execute(query)
         conn.commit()
-        query = '''insert into hp_device_day_profile_map values (%d, '%s', '%s')''' %\
-                (device, day, profile)
+        query = '''insert into hp_device_day_profile_map values (%d, '%s', '%s', %5.2f, %5.2f, %5.2f, %5.2f)''' %\
+                (device, day, profile, temps['t_lo'], temps['t_med'], temps['t_high'], temps['t_hottt'])
         # print ("Query in store_entry_in_db: " + query)
         cur.execute(query)
         conn.commit()
@@ -217,7 +217,13 @@ def read_entry_from_db(db_file, device, day):# {{{
         print ("SQL read error: " + str(e))
     conn.close()
     # print ("SQL Result: %s" % str(allentries))
-    return (allentries[-1]['profile'])
+    temps            = {}
+    temps['t_lo']    = allentries[-1]['t_lo']
+    temps['t_med']   = allentries[-1]['t_med']
+    temps['t_high']  = allentries[-1]['t_high']
+    temps['t_hottt'] = allentries[-1]['t_hottt']
+    return (allentries[-1]['profile'], temps)
+
     # }}}
 # }}}
 ################### /sqlite ##############
@@ -250,9 +256,15 @@ if args.put:# {{{
         print("profile_name is not specified but required when using --put")
         exit(1)
 
-    store_entry_in_db(args.db_file, args.device, args.day, args.profile_name)
+    temps = {}
+    temps['t_lo']    = args.t_lo
+    temps['t_med']   = args.t_med
+    temps['t_high']  = args.t_high
+    temps['t_hottt'] = args.t_hottt
 
-    profile = profile_generator(args.profile_name, args.day)
+    store_entry_in_db(args.db_file, args.device, args.day, args.profile_name, temps)
+
+    profile = profile_generator(args.profile_name, args.day, temps)
 
     if not dry_run:
         hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
@@ -260,13 +272,13 @@ if args.put:# {{{
         # in_params = hg.getParamset(1, 0, "MASTER")
         # setattr(params, "TEMPERATURE_MONDAY_4", 11)
 
-        hg.putParamset(args.device, 0, "MASTER", args.profile)
+        hg.putParamset(args.device, 0, "MASTER", profile)
 # }}}
 if args.get: # {{{
-    profile_name = read_entry_from_db(args.db_file, args.device, args.day)
+    profile_name, (temps) = read_entry_from_db(args.db_file, args.device, args.day)
     print (profile_name)
 
-    profile = profile_generator(profile_name, args.day)
+    profile = profile_generator(profile_name, args.day, temps)
 
     if args.verbose:
         print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
