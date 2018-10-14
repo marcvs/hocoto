@@ -274,6 +274,7 @@ if args.put:# {{{
         # setattr(params, "TEMPERATURE_MONDAY_4", 11)
 
         hg.putParamset(args.device, 0, "MASTER", profile)
+    print (args.profile_name)
 # }}}
 if args.get: # {{{
     profile_name, (temps) = read_entry_from_db(args.db_file, args.device, args.day)
