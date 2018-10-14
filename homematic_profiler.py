@@ -49,7 +49,7 @@ def parseOptions():# {{{
 
     parser.add_argument('--verbose', '-v', action="count", default=0, help='Verbosity')
     parser.add_argument('all_args',        nargs='*')
-    parser.add_argument('--logfile',       default='/tmp/test-py.log')
+    parser.add_argument('--logfile',       default='/tmp/homematic_profiler.log')
     parser.add_argument('--loglevel',      default='debug')
     parser.add_argument('--device',        type=int)
     parser.add_argument('--day',           choices = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"])
