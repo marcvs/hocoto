@@ -71,11 +71,12 @@ def eventHandler(eventSource, peerId, channel, variableName, value):# {{{
     '''event handler'''
     # Note that the event handler is called by a different thread than the main thread. I. e. thread synchronization is
     # needed when you access non local variables.
-    print("Event handler called with arguments: source: " + eventSource + \
-            ";\n     peerId: " + str(peerId) + \
-            ";\n     channel: " + str(channel) + \
-            ";\n     variable name: " + variableName + \
-            ";\n     value: " + str(value))
+    pass
+    # print("Event handler called with arguments: source: " + eventSource + \
+    #         ";\n     peerId: " + str(peerId) + \
+    #         ";\n     channel: " + str(channel) + \
+    #         ";\n     variable name: " + variableName + \
+    #         ";\n     value: " + str(value))
 # }}}
 def profile_generator(profilename, day_short_name, temps):# {{{
     '''Generate profiles for given weekday'''
