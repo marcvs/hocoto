@@ -56,6 +56,7 @@ def parseOptions():# {{{
     parser.add_argument('--profile_name',  '--mode',            choices = allowed_profile_names)
     parser.add_argument('--put',           action='store_true', default=False)
     parser.add_argument('--get',           action='store_true', default=False)
+    parser.add_argument('--get-t',         action='store_true', default=False)
     parser.add_argument('--db-file',       default='/var/tmp/homematic_profile.db')
     parser.add_argument('--t-lo',          type=float,            default=17)
     parser.add_argument('--t-med',         type=float,            default=18)
@@ -157,9 +158,14 @@ def init_sqlite_tables(db_file):# {{{
     conn = sqlite3.connect(db_file)
     cur = conn.cursor()
     try:
+        # cur.execute('''create table if not exists hp_device_day_profile_map'''
+        #     '''(device INTEGER, weekday TEXT, profile TEXT,
+        #     t_lo REAL, t_med REAL, t_high REAL, t_hottt REAL)''')
         cur.execute('''create table if not exists hp_device_day_profile_map'''
-            '''(device INTEGER, weekday TEXT, profile TEXT,
-            t_lo REAL, t_med REAL, t_high REAL, t_hottt REAL)''')
+            '''(device INTEGER, weekday TEXT, profile TEXT)''')
+        conn.commit()
+        cur.execute('''create table if not exists hp_device_temperature_map'''
+            '''(device INTEGER, t_lo REAL, t_med REAL, t_high REAL, t_hottt REAL)''')
         conn.commit()
         conn.close()
 
@@ -182,9 +188,21 @@ def store_entry_in_db(db_file, device, day, profile, temps):# {{{
         # print ("Query in store_entry_in_db: " + query)
         cur.execute(query)
         conn.commit()
-        query = '''insert into hp_device_day_profile_map values (%d, '%s', '%s', %5.2f, %5.2f, %5.2f, %5.2f)''' %\
-                (device, day, profile, temps['t_lo'], temps['t_med'], temps['t_high'], temps['t_hottt'])
+        # query = '''insert into hp_device_day_profile_map values (%d, '%s', '%s', %5.2f, %5.2f, %5.2f, %5.2f)''' %\
+        #         (device, day, profile, temps['t_lo'], temps['t_med'], temps['t_high'], temps['t_hottt'])
+        query = '''insert into hp_device_day_profile_map values (%d, '%s', '%s')''' %\
+                (device, day, profile)
+        cur.execute(query)
+        conn.commit()
+
+
+        query = '''delete from hp_device_temperature_map where device=%s''' %\
+                (device);
         # print ("Query in store_entry_in_db: " + query)
+        cur.execute(query)
+        conn.commit()
+        query = '''insert into hp_device_temperature_map values (%d, %5.2f, %5.2f, %5.2f, %5.2f)''' %\
+                (device, temps['t_lo'], temps['t_med'], temps['t_high'], temps['t_hottt'])
         cur.execute(query)
         conn.commit()
 
@@ -195,7 +213,7 @@ def store_entry_in_db(db_file, device, day, profile, temps):# {{{
     return(True)
     # }}}
 # }}}
-def read_entry_from_db(db_file, device, day):# {{{
+def read_profile_entry_from_db(db_file, device, day):# {{{
     '''Read some or all entries from sqlite'''
     # Setup SQL connection # {{{
     conn = sqlite3.connect(db_file)
@@ -204,9 +222,11 @@ def read_entry_from_db(db_file, device, day):# {{{
     # }}}
     # do sqlite query {{{
     try:
+        # query = '''select * from hp_device_day_profile_map where device=%d and weekday='%s' ''' %\
+        #     (device, day)
+        # print ("Query in read_entry_from_db: " + query)
         query = '''select * from hp_device_day_profile_map where device=%d and weekday='%s' ''' %\
             (device, day)
-        # print ("Query in read_entry_from_db: " + query)
         cur.execute(query)
         conn.commit()
         allentries = cur.fetchall()
@@ -217,15 +237,38 @@ def read_entry_from_db(db_file, device, day):# {{{
     except sqlite3.OperationalError as e:
         print ("SQL read error: " + str(e))
     conn.close()
-    # print ("SQL Result: %s" % str(allentries))
-    temps            = {}
-    temps['t_lo']    = allentries[-1]['t_lo']
-    temps['t_med']   = allentries[-1]['t_med']
-    temps['t_high']  = allentries[-1]['t_high']
-    temps['t_hottt'] = allentries[-1]['t_hottt']
-    return (allentries[-1]['profile'], temps)
+    return (allentries[-1]['profile'])
 
     # }}}
+# }}}
+def read_temps_entry_from_db(db_file, device):# {{{
+    '''Read some or all entries from sqlite'''
+    # Setup SQL connection # {{{
+    conn = sqlite3.connect(db_file)
+    conn.row_factory = dict_factory
+    cur = conn.cursor()
+    # }}}
+    # do sqlite query {{{
+    try:
+        query = '''select * from hp_device_temperature_map where device=%d ''' % (device)
+        cur.execute(query)
+        conn.commit()
+        all_temp_entries = cur.fetchall()
+        if len(all_temp_entries) > 1:
+            print ("Warning; Query >>%s<< yielded %d entries; Expected only one. Using last one" %
+                (query, len(all_temp_entries)))
+
+    except sqlite3.OperationalError as e:
+        print ("SQL read error: " + str(e))
+    conn.close()
+    # print ("SQL Result: %s" % str(allentries))
+    temps            = {}
+    temps['t_lo']    = all_temp_entries[-1]['t_lo']
+    temps['t_med']   = all_temp_entries[-1]['t_med']
+    temps['t_high']  = all_temp_entries[-1]['t_high']
+    temps['t_hottt'] = all_temp_entries[-1]['t_hottt']
+    return (temps)
+
 # }}}
 ################### /sqlite ##############
 
@@ -277,12 +320,16 @@ if args.put:# {{{
     print (args.profile_name)
 # }}}
 if args.get: # {{{
-    profile_name, (temps) = read_entry_from_db(args.db_file, args.device, args.day)
+    profile_name = read_profile_entry_from_db(args.db_file, args.device, args.day)
+    temps        = read_temps_entry_from_db(args.db_file, args.device)
     print (profile_name)
 
     profile = profile_generator(profile_name, args.day, temps)
 
     if args.verbose:
         print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
-
+# }}}
+if args.get_t: # {{{
+    temps = read_temps_entry_from_db(args.db_file, args.device)
+    print (str(temps))
 # }}}
