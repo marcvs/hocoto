@@ -45,7 +45,7 @@ def parseOptions():# {{{
     parser = configargparse.ArgumentParser(
             default_config_files = config_files,
             description='''test''')
-    parser.add('-c', '--my-config', is_config_file=True, help='config file path') 
+    parser.add('-c', '--my-config', is_config_file=True, help='config file path')
 
     parser.add_argument('--verbose', '-v', action="count", default=0, help='Verbosity')
     parser.add_argument('all_args',        nargs='*')
@@ -282,9 +282,9 @@ if dry_run:
 logformat = "{%(asctime)s %(filename)s:%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
 loglevel = logging.getLevelName(args.loglevel.upper())
 logging.basicConfig(level=loglevel, format=logformat, filename=args.logfile)
-logging.debug('\nhomematirc_profiler- v.0.0.2')
+# logging.debug('homematirc_profiler- v.0.0.3')
 # }}}
-# logging.info(parser.format_values())
+logging.info(' '.join(sys.argv))
 
 init_sqlite_tables(args.db_file)
 
