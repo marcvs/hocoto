@@ -183,28 +183,36 @@ def store_entry_in_db(db_file, device, day, profile, temps):# {{{
     # }}}
     # do sqlite query {{{
     try:
-        query = '''delete from hp_device_day_profile_map where device=%s and weekday='%s' ''' %\
-                (device, day);
-        # print ("Query in store_entry_in_db: " + query)
+        # hp_device_day_profile_map
+        query = '''update hp_device_day_profile_map set device=%d, weekday='%s', '''\
+                '''profile='%s' where device=%d''' %\
+                (device, day, profile, device)
         cur.execute(query)
         conn.commit()
-        # query = '''insert into hp_device_day_profile_map values (%d, '%s', '%s', %5.2f, %5.2f, %5.2f, %5.2f)''' %\
-        #         (device, day, profile, temps['t_lo'], temps['t_med'], temps['t_high'], temps['t_hottt'])
-        query = '''insert into hp_device_day_profile_map values (%d, '%s', '%s')''' %\
-                (device, day, profile)
-        cur.execute(query)
-        conn.commit()
+        rows=cur.rowcount
+        logging.info('updated: %d rows' % rows)
+        if cur.rowcount == 0:
+            query = '''insert into hp_device_day_profile_map values (%d, '%s', '%s')''' %\
+                    (device, day, profile)
+            cur.execute(query)
+            conn.commit()
+            logging.info('written: %d rows' % rows)
 
-
-        query = '''delete from hp_device_temperature_map where device=%s''' %\
-                (device);
-        # print ("Query in store_entry_in_db: " + query)
+        # hp_device_temperature_map
+        query = '''update hp_device_temperature_map set device=%d, t_lo=%5.2f, t_med=%5.2f, '''\
+                '''t_high=%5.2f, t_hottt=%5.2f WHERE device=%d''' %\
+                (device, temps['t_lo'], temps['t_med'], temps['t_high'], temps['t_hottt'], device)
         cur.execute(query)
         conn.commit()
-        query = '''insert into hp_device_temperature_map values (%d, %5.2f, %5.2f, %5.2f, %5.2f)''' %\
-                (device, temps['t_lo'], temps['t_med'], temps['t_high'], temps['t_hottt'])
-        cur.execute(query)
-        conn.commit()
+        rows=cur.rowcount
+        logging.info('updated: %d rows' % rows)
+        if cur.rowcount == 0:
+            query = '''insert into hp_device_temperature_map values (%d, %5.2f, %5.2f, %5.2f, %5.2f)''' %\
+                    (device, temps['t_lo'], temps['t_med'], temps['t_high'], temps['t_hottt'])
+            cur.execute(query)
+            conn.commit()
+            rows=cur.rowcount
+            logging.info('written: %d rows' % rows)
 
     except sqlite3.OperationalError as e:
         print ("SQL read error: " + str(e))
