@@ -184,8 +184,8 @@ def store_profile_entry_in_db(db_file, device, day, profile):# {{{
     try:
         # hp_device_day_profile_map
         query = '''update hp_device_day_profile_map set device=%d, weekday='%s', '''\
-                '''profile='%s' where device=%d''' %\
-                (device, day, profile, device)
+                '''profile='%s' where device=%d and weekday='%s' ''' %\
+                (device, day, profile, device, day)
         cur.execute(query)
         conn.commit()
         rows=cur.rowcount
