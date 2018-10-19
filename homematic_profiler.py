@@ -189,13 +189,11 @@ def store_profile_entry_in_db(db_file, device, day, profile):# {{{
         cur.execute(query)
         conn.commit()
         rows=cur.rowcount
-        logging.info('updated: %d rows' % rows)
         if cur.rowcount == 0:
             query = '''insert into hp_device_day_profile_map values (%d, '%s', '%s')''' %\
                     (device, day, profile)
             cur.execute(query)
             conn.commit()
-            logging.info('written: %d rows' % rows)
     except sqlite3.OperationalError as e:
         print ("SQL read error: " + str(e))
         return(False)
@@ -219,15 +217,12 @@ def store_temps_entry_in_db(db_file, device, temps):# {{{
         cur.execute(query)
         conn.commit()
         rows=cur.rowcount
-        logging.info('updated: %d rows' % rows)
         if cur.rowcount == 0:
             query = '''insert into hp_device_temperature_map values (%d, %5.2f, %5.2f, %5.2f, %5.2f)''' %\
                     (device, temps['t_lo'], temps['t_med'], temps['t_high'], temps['t_hottt'])
             cur.execute(query)
             conn.commit()
             rows=cur.rowcount
-            logging.info('written: %d rows' % rows)
-
     except sqlite3.OperationalError as e:
         print ("SQL read error: " + str(e))
         return(False)
