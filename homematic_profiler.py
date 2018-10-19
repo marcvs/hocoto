@@ -141,7 +141,6 @@ def profile_generator(profilename, day_short_name, temps):# {{{
     return(params)
 # }}}
 
-
 # Global variables
 allowed_profile_names = ["fma", "ma", "t", "ta", "a"]
 ################### sqlite ##############
@@ -174,7 +173,7 @@ def init_sqlite_tables(db_file):# {{{
         raise
     # self.db_was_initialised = True
 # }}}
-def store_entry_in_db(db_file, device, day, profile, temps):# {{{
+def store_profile_entry_in_db(db_file, device, day, profile):# {{{
     '''Store profile for given weekday and device'''
     # Setup SQL connection # {{{
     conn = sqlite3.connect(db_file)
@@ -197,7 +196,22 @@ def store_entry_in_db(db_file, device, day, profile, temps):# {{{
             cur.execute(query)
             conn.commit()
             logging.info('written: %d rows' % rows)
-
+    except sqlite3.OperationalError as e:
+        print ("SQL read error: " + str(e))
+        return(False)
+    conn.close()
+    return(True)
+    # }}}
+# }}}
+def store_temps_entry_in_db(db_file, device, temps):# {{{
+    '''Store profile for given weekday and device'''
+    # Setup SQL connection # {{{
+    conn = sqlite3.connect(db_file)
+    conn.row_factory = dict_factory
+    cur = conn.cursor()
+    # }}}
+    # do sqlite query {{{
+    try:
         # hp_device_temperature_map
         query = '''update hp_device_temperature_map set device=%d, t_lo=%5.2f, t_med=%5.2f, '''\
                 '''t_high=%5.2f, t_hottt=%5.2f WHERE device=%d''' %\
@@ -276,10 +290,9 @@ def read_temps_entry_from_db(db_file, device):# {{{
     temps['t_high']  = all_temp_entries[-1]['t_high']
     temps['t_hottt'] = all_temp_entries[-1]['t_hottt']
     return (temps)
-
+    # }}}
 # }}}
 ################### /sqlite ##############
-
 
 ################## MAIN ########################
 (args, parser) = parseOptions()
