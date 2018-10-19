@@ -310,27 +310,29 @@ logging.info(' '.join(sys.argv))
 init_sqlite_tables(args.db_file)
 
 if args.put:# {{{
-    # sanity checking:
-    if args.device is None:
-        print("device is not specified but required when using --put")
-        exit(2)
-    if args.day is None:
-        print("day is not specified but required when using --put")
-        exit(2)
-    if args.profile_name is None:
-        print("profile_name is not specified but required when using --put")
-        exit(1)
-
     temps = {}
     temps['t_lo']    = args.t_lo
     temps['t_med']   = args.t_med
     temps['t_high']  = args.t_high
     temps['t_hottt'] = args.t_hottt
+    # sanity checking:
+    if args.device is None:
+        print("device is not specified but required when using --put")
+        exit(2)
 
-    store_entry_in_db(args.db_file, args.device, args.day, args.profile_name, temps)
+    if args.day is None:
+        # print("day is not specified but required when using --put")
+        store_temps_entry_in_db(args.db_file, args.device, temps)
+        exit(0)
 
+    if args.profile_name is None:
+        print("profile_name is not specified but required when using --put")
+        exit(1)
+
+    store_profile_entry_in_db(args.db_file, args.device, args.day, args.profile_name)
+
+    ### TODO: This stuff could go to "args.store or args.transfer"
     profile = profile_generator(args.profile_name, args.day, temps)
-
     if not dry_run:
         hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
 
