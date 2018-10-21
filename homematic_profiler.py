@@ -423,8 +423,7 @@ if args.get_t: # {{{
 # }}}
 if args.get_all: # {{{
     temps = read_temps_entry_from_db(args.db_file, args.device)
-    profile_names = {}
     for day in weekdays:
-        profile_names[day] = read_profile_entry_from_db(args.db_file, args.device, day)
-    print (str([temps, profile_names]))
+        temps[day] = read_profile_entry_from_db(args.db_file, args.device, day)
+    print (str(temps))
 # }}}
