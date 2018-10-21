@@ -373,8 +373,9 @@ if args.put_all:# {{{
         if not dry_run:
             hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
             hg.putParamset(args.device, 0, "MASTER", profile)
-        if args.verbose:
             logging.info('putting profile %s for %s' % (profile_name, day))
+        if args.verbose:
+            logging.info('sending profile %s for %s to homegear' % (profile_name, day))
 # }}}
 if args.put:# profile # {{{
     # sanity checking:
@@ -396,11 +397,8 @@ if args.put:# profile # {{{
     profile = profile_generator(args.profile_name, args.day, temps)
     if not dry_run:
         hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
-
-        # in_params = hg.getParamset(1, 0, "MASTER")
-        # setattr(params, "TEMPERATURE_MONDAY_4", 11)
-
         hg.putParamset(args.device, 0, "MASTER", profile)
+        logging.info('sending profile %s for %s to homegear' % (args.profile_name, args.day))
     print (args.profile_name)
 # }}}
 if args.get: # {{{
