@@ -55,10 +55,11 @@ def parseOptions():# {{{
     parser.add_argument('--day',           choices = weekdays)
     parser.add_argument('--profile_name',  '--mode',            choices = allowed_profile_names)
     parser.add_argument('--put',           action='store_true', default=False)
+    parser.add_argument('--put-t',         action='store_true', default=False)
     parser.add_argument('--put-all',       action='store_true', default=False)
     parser.add_argument('--get',           action='store_true', default=False)
     parser.add_argument('--get-t',         action='store_true', default=False)
-    parser.add_argument('--put-t',         action='store_true', default=False)
+    parser.add_argument('--get-all',       action='store_true', default=False)
     parser.add_argument('--db-file',       default='/var/tmp/homematic_profile.db')
     parser.add_argument('--t-lo',          type=float,            default=0.0)
     parser.add_argument('--t-med',         type=float,            default=0.0)
@@ -364,8 +365,8 @@ if args.put_all:# {{{
     if args.device is None:
         print("device is not specified but required when using --put")
         exit(2)
+    temps        = read_temps_entry_from_db(args.db_file, args.device)
     for day in weekdays:
-        temps        = read_temps_entry_from_db(args.db_file, args.device)
         profile_name = read_profile_entry_from_db(args.db_file, args.device, day)
         profile      = profile_generator(profile_name, day, temps)
         if args.verbose > 1:
@@ -412,6 +413,18 @@ if args.get: # {{{
         print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
 # }}}
 if args.get_t: # {{{
+    # sanity checking:
+    if args.device is None:
+        print("device is not specified but required when using --put")
+        exit(6)
+
     temps = read_temps_entry_from_db(args.db_file, args.device)
     print (str(temps))
+# }}}
+if args.get_all: # {{{
+    temps = read_temps_entry_from_db(args.db_file, args.device)
+    profile_names = {}
+    for day in weekdays:
+        profile_names[day] = read_profile_entry_from_db(args.db_file, args.device, day)
+    print (str([temps, profile_names]))
 # }}}
