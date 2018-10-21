@@ -314,7 +314,7 @@ if dry_run:
 
 # Setup logging{{{
 # logformat = "{%(asctime)s %(filename)s:%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
-logformat = "%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
+logformat = "%(asctime)s %(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
 loglevel = logging.getLevelName(args.loglevel.upper())
 logging.basicConfig(level=loglevel, format=logformat, filename=args.logfile)
 # logging.debug('homematirc_profiler- v.0.0.3')
