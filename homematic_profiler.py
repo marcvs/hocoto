@@ -52,9 +52,10 @@ def parseOptions():# {{{
     parser.add_argument('--logfile',       default='/var/log/openhab2/homematic_profiler.log')
     parser.add_argument('--loglevel',      default='debug')
     parser.add_argument('--device',        type=int)
-    parser.add_argument('--day',           choices = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"])
+    parser.add_argument('--day',           choices = weekdays)
     parser.add_argument('--profile_name',  '--mode',            choices = allowed_profile_names)
     parser.add_argument('--put',           action='store_true', default=False)
+    parser.add_argument('--put-all',       action='store_true', default=False)
     parser.add_argument('--get',           action='store_true', default=False)
     parser.add_argument('--get-t',         action='store_true', default=False)
     parser.add_argument('--put-t',         action='store_true', default=False)
@@ -144,6 +145,7 @@ def profile_generator(profilename, day_short_name, temps):# {{{
 
 # Global variables
 allowed_profile_names = ["fma", "ma", "t", "ta", "a"]
+weekdays              = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 default_t_lo          = 17.0
 default_t_med         = 19.0
 default_t_high        = 20.0
@@ -250,16 +252,19 @@ def read_profile_entry_from_db(db_file, device, day):# {{{
         # print ("Query in read_entry_from_db: " + query)
         query = '''select * from hp_device_day_profile_map where device=%d and weekday='%s' ''' %\
             (device, day)
+        # logging.info(query)
         cur.execute(query)
         conn.commit()
         allentries = cur.fetchall()
         if len(allentries) > 1:
             print ("Warning; Query >>%s<< yielded %d entries; Expected only one. Using last one" %
                 (query, len(allentries)))
-
+        # logging.info(str(allentries))
     except sqlite3.OperationalError as e:
         print ("SQL read error: " + str(e))
     conn.close()
+    if allentries == []:
+        return ('ma')
     return (allentries[-1]['profile'])
 
     # }}}
@@ -353,6 +358,23 @@ if args.put_t: # put a temperature value # {{{
     store_temps_entry_in_db(args.db_file, args.device, temps)
 
     exit (0)
+# }}}
+if args.put_all:# {{{
+    # sanity checking:
+    if args.device is None:
+        print("device is not specified but required when using --put")
+        exit(2)
+    for day in weekdays:
+        temps        = read_temps_entry_from_db(args.db_file, args.device)
+        profile_name = read_profile_entry_from_db(args.db_file, args.device, day)
+        profile      = profile_generator(profile_name, day, temps)
+        if args.verbose > 1:
+            print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
+        if not dry_run:
+            hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
+            hg.putParamset(args.device, 0, "MASTER", profile)
+        if args.verbose:
+            logging.info('putting profile %s for %s' % (profile_name, day))
 # }}}
 if args.put:# profile # {{{
     # sanity checking:
