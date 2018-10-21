@@ -57,11 +57,12 @@ def parseOptions():# {{{
     parser.add_argument('--put',           action='store_true', default=False)
     parser.add_argument('--get',           action='store_true', default=False)
     parser.add_argument('--get-t',         action='store_true', default=False)
+    parser.add_argument('--put-t',         action='store_true', default=False)
     parser.add_argument('--db-file',       default='/var/tmp/homematic_profile.db')
-    parser.add_argument('--t-lo',          type=float,            default=17)
-    parser.add_argument('--t-med',         type=float,            default=18)
-    parser.add_argument('--t-high',        type=float,            default=20)
-    parser.add_argument('--t-hottt',       type=float,            default=21)
+    parser.add_argument('--t-lo',          type=float,            default=0.0)
+    parser.add_argument('--t-med',         type=float,            default=0.0)
+    parser.add_argument('--t-high',        type=float,            default=0.0)
+    parser.add_argument('--t-hottt',       type=float,            default=0.0)
 
     args = parser.parse_args()
     # print(parser.format_values())
@@ -143,6 +144,11 @@ def profile_generator(profilename, day_short_name, temps):# {{{
 
 # Global variables
 allowed_profile_names = ["fma", "ma", "t", "ta", "a"]
+default_t_lo          = 17.0
+default_t_med         = 19.0
+default_t_high        = 20.0
+default_t_hottt       = 21.0
+
 ################### sqlite ##############
 def dict_factory(cursor, row):# {{{
     '''helper for json export from sqlite'''
@@ -280,10 +286,22 @@ def read_temps_entry_from_db(db_file, device):# {{{
     conn.close()
     # print ("SQL Result: %s" % str(allentries))
     temps            = {}
-    temps['t_lo']    = all_temp_entries[-1]['t_lo']
-    temps['t_med']   = all_temp_entries[-1]['t_med']
-    temps['t_high']  = all_temp_entries[-1]['t_high']
-    temps['t_hottt'] = all_temp_entries[-1]['t_hottt']
+    try:
+        temps['t_lo']    = all_temp_entries[-1]['t_lo']
+    except IndexError:
+        temps['t_lo']    = default_t_lo
+    try:
+        temps['t_med']   = all_temp_entries[-1]['t_med']
+    except IndexError:
+        temps['t_med']    = default_t_med
+    try:
+        temps['t_high']  = all_temp_entries[-1]['t_high']
+    except IndexError:
+        temps['t_high']    = default_t_high
+    try:
+        temps['t_hottt'] = all_temp_entries[-1]['t_hottt']
+    except IndexError:
+        temps['t_hottt']    = default_t_hottt
     return (temps)
     # }}}
 # }}}
@@ -295,7 +313,8 @@ if dry_run:
     args.verbose += 1
 
 # Setup logging{{{
-logformat = "{%(asctime)s %(filename)s:%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
+# logformat = "{%(asctime)s %(filename)s:%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
+logformat = "%(funcName)s:%(lineno)d} %(levelname)s - %(message)s"
 loglevel = logging.getLevelName(args.loglevel.upper())
 logging.basicConfig(level=loglevel, format=logformat, filename=args.logfile)
 # logging.debug('homematirc_profiler- v.0.0.3')
@@ -304,24 +323,49 @@ logging.info(' '.join(sys.argv))
 
 init_sqlite_tables(args.db_file)
 
-if args.put:# {{{
+if args.put_t: # put a temperature value # {{{
+    # one of the values must me nonzero
+    values_to_set = []
     temps = {}
     temps['t_lo']    = args.t_lo
     temps['t_med']   = args.t_med
     temps['t_high']  = args.t_high
     temps['t_hottt'] = args.t_hottt
+    for value in ['t_lo', 't_med', 't_high', 't_hottt']:
+        if temps[value] != 0:
+            values_to_set.append(value)
+    if values_to_set == []:
+        print ("No nonzero temperature provided; Fatal!")
+        exit (3)
+    print ('Setting %s' % str(values_to_set))
+
+    try:
+        temps = read_temps_entry_from_db(args.db_file, args.device)
+        print ("sql read successful")
+        print (json.dumps(temps, sort_keys=False, indent=4, separators=(',', ': ')))
+        for value in values_to_set:
+            temps[value] = getattr(args, value)
+            print("setting: %s %f" % (value, getattr(args, value)))
+    except Exception as e:
+        print  ("Except: %s" % str(e))
+        raise
+
+    store_temps_entry_in_db(args.db_file, args.device, temps)
+
+    exit (0)
+# }}}
+if args.put:# profile # {{{
     # sanity checking:
     if args.device is None:
         print("device is not specified but required when using --put")
         exit(2)
 
     if args.day is None:
-        # print("day is not specified but required when using --put")
-        store_temps_entry_in_db(args.db_file, args.device, temps)
+        print("day is not specified but required when using --put")
         exit(0)
 
     if args.profile_name is None:
-        print("profile_name is not specified but required when using --put")
+        print("day is specified, but profile_name not. This is required when using --put and --day")
         exit(1)
 
     store_profile_entry_in_db(args.db_file, args.device, args.day, args.profile_name)
