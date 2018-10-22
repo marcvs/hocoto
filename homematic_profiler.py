@@ -61,6 +61,7 @@ def parseOptions():# {{{
     parser.add_argument('--get-t',         action='store_true', default=False)
     parser.add_argument('--get-all',       action='store_true', default=False)
     parser.add_argument('--pull-from-device', action='store_true', default=False)
+    parser.add_argument('--store-profile', default=None)
     parser.add_argument('--db-file',       default='/var/tmp/homematic_profile.db')
     parser.add_argument('--t-lo',          type=float,            default=0.0)
     parser.add_argument('--t-med',         type=float,            default=0.0)
@@ -103,8 +104,9 @@ def profile_generator(profilename, day_short_name, temps):# {{{
 
 
     profiles['a']['temp'][0]   = t_lo   ; profiles['a']['time'][0]   = 60* 16 + 0
-    profiles['a']['temp'][1]   = t_high ; profiles['a']['time'][1]   = 60* 24 + 0
-    profiles['a']['temp'][2]   = t_lo   ; profiles['a']['time'][2]   = 60* 24 + 0
+    profiles['a']['temp'][1]   = t_med  ; profiles['a']['time'][1]   = 60* 17 + 0
+    profiles['a']['temp'][2]   = t_high ; profiles['a']['time'][2]   = 60* 24 + 0
+    profiles['a']['temp'][3]   = t_lo   ; profiles['a']['time'][3]   = 60* 24 + 0
 
     profiles['ma']['temp'][0]  = t_lo   ; profiles['ma']['time'][0]  = 60*  6 + 0
     profiles['ma']['temp'][1]  = t_high ; profiles['ma']['time'][1]  = 60*  8 + 0
@@ -112,10 +114,10 @@ def profile_generator(profilename, day_short_name, temps):# {{{
     profiles['ma']['temp'][3]  = t_med  ; profiles['ma']['time'][3]  = 60* 23 + 0
     profiles['ma']['temp'][4]  = t_lo   ; profiles['ma']['time'][4]  = 60* 24 + 0
 
-    profiles['fma']['temp'][0] = t_lo   ; profiles['fma']['time'][0] = 60*  5 + 00
-    profiles['fma']['temp'][1] = t_high ; profiles['fma']['time'][1] = 60*  9 + 0
+    profiles['fma']['temp'][0] = t_lo   ; profiles['fma']['time'][0] = 60*  5 + 0
+    profiles['fma']['temp'][1] = t_high ; profiles['fma']['time'][1] = 60*  8 + 0
     profiles['fma']['temp'][2] = t_lo   ; profiles['fma']['time'][2] = 60* 17 + 0
-    profiles['fma']['temp'][3] = t_med  ; profiles['fma']['time'][3] = 60* 21 + 00
+    profiles['fma']['temp'][3] = t_med  ; profiles['fma']['time'][3] = 60* 21 + 0
     profiles['fma']['temp'][4] = t_high ; profiles['fma']['time'][4] = 60* 23 + 0
     profiles['fma']['temp'][5] = t_lo   ; profiles['fma']['time'][5] = 60* 24 + 0
 
@@ -125,9 +127,12 @@ def profile_generator(profilename, day_short_name, temps):# {{{
     profiles['t']['temp'][3]   = t_lo   ; profiles['t']['time'][3]   = 60* 24 + 0
 
     profiles['ta']['temp'][0]  = t_lo   ; profiles['ta']['time'][0]  = 60*  8 + 0
-    profiles['ta']['temp'][1]  = t_med  ; profiles['ta']['time'][1]  = 60* 19 + 30
-    profiles['ta']['temp'][2]  = t_high ; profiles['ta']['time'][2]  = 60* 23 + 50
+    profiles['ta']['temp'][1]  = t_high ; profiles['ta']['time'][1]  = 60* 21 + 0
+    profiles['ta']['temp'][2]  = t_med  ; profiles['ta']['time'][2]  = 60* 22 + 0
     profiles['ta']['temp'][3]  = t_lo   ; profiles['ta']['time'][3]  = 60* 24 + 0
+
+    profiles['o']['temp'][0]  = t_lo   ; profiles['o']['time'][0]  = 60*  1 + 0
+    profiles['o']['temp'][1]  = t_lo   ; profiles['o']['time'][1]  = 60* 24 + 0
 
     params={}
     for i in range(0,13):
@@ -137,7 +142,7 @@ def profile_generator(profilename, day_short_name, temps):# {{{
 # }}}
 
 # Global variables{{{
-allowed_profile_names = ["fma", "ma", "t", "ta", "a"]
+allowed_profile_names = ["fma", "ma", "t", "ta", "a", "o"]
 weekdays              = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 now = datetime.datetime.now()
 days = {'mon': 'MONDAY',
@@ -147,6 +152,7 @@ days = {'mon': 'MONDAY',
         'fri': 'FRIDAY',
         'sat': 'SATURDAY',
         'sun': 'SUNDAY',
+        'tmp': 'WEEKDAY',
         'today': now.strftime("%A").upper() }
 default_t_lo          = 17.0
 default_t_med         = 19.0
@@ -175,6 +181,12 @@ def init_sqlite_tables(db_file):# {{{
         conn.commit()
         cur.execute('''create table if not exists hp_device_temperature_map'''
             '''(device INTEGER, t_lo REAL, t_med REAL, t_high REAL, t_hottt REAL)''')
+        conn.commit()
+        cur.execute('''create table if not exists profile_names'''
+            '''(name TEXT)''')
+        conn.commit()
+        cur.execute('''create table if not exists profiles'''
+            '''(profile_id INTEGER, number INTEGER, temp TEXT, time INTEGER)''')
         conn.commit()
         conn.close()
 
@@ -311,6 +323,70 @@ def read_temps_entry_from_db(db_file, device):# {{{
         temps['t_hottt']    = default_t_hottt
     return (temps)
     # }}}
+# }}}
+
+def get_profile_id_by_name(db_file, profile_name):# {{{
+    # Setup SQL connection # {{{
+    conn = sqlite3.connect(db_file)
+    conn.row_factory = dict_factory
+    cur = conn.cursor()
+    # }}}
+    # store profile name and get its ID
+    try:
+        query = '''update profile_names set name='%s' WHERE name='%s' ''' %\
+                (profile_name, profile_name)
+        cur.execute(query)
+        conn.commit()
+        rows=cur.rowcount
+        if cur.rowcount == 0:
+            query = '''insert into profile_names values ('%s')''' % (profile_name)
+            cur.execute(query)
+            conn.commit()
+            # print ("inserted")
+        else:
+            # print ("updated")
+            pass
+    except sqlite3.OperationalError as e:
+        print ("SQL read error: " + str(e))
+
+    cur.execute('''select rowid from profile_names WHERE name='%s' ''' % profile_name)
+    allentries = cur.fetchall()
+    return(allentries[-1]['rowid'])
+# }}}
+def store_profile_in_db(db_file, profile_name):# {{{
+    temps ={'t_lo': 't_lo', 't_med':  't_med', 't_high':  't_high', 't_hottt':  't_hottt'}
+    profile = profile_generator(profile_name, 'tmp', temps)
+    profile_id = get_profile_id_by_name(db_file, profile_name)
+
+    print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
+    for i in range (1, 14):
+        try:
+            # Setup SQL connection # {{{
+            conn = sqlite3.connect(db_file)
+            conn.row_factory = dict_factory
+            cur = conn.cursor()
+            # }}}
+            query = '''update profiles set profile_id=%d, number=%d, temp='%s', time=%d '''\
+                    '''WHERE profile_id=%d AND number=%d ''' %\
+                    (profile_id, i,
+                     profile['TEMPERATURE_WEEKDAY_%d'%i], profile['ENDTIME_WEEKDAY_%d'%i],
+                     profile_id, i)
+            cur.execute(query)
+            conn.commit()
+            rows=cur.rowcount
+            print ("Rows: %d" % rows)
+            if cur.rowcount == 0:
+                query = '''insert into profiles values (%d, %d, '%s', %d) ''' %\
+                        (profile_id, i,
+                         profile['TEMPERATURE_WEEKDAY_%d'%i], profile['ENDTIME_WEEKDAY_%d'%i])
+                cur.execute(query)
+                conn.commit()
+                print ("insert")
+            else:
+                print ("update")
+        except sqlite3.OperationalError as e:
+            print ("SQL read error: " + str(e))
+    conn.close()
 # }}}
 ################### /sqlite ##############
 
@@ -481,3 +557,9 @@ if args.pull_from_device: # {{{
 
 
 # }}}
+if args.store_profile is not None:
+    profile_name = args.store_profile
+    # print ("Profile to store in DB: %s" % profile_name)
+
+    store_profile_in_db(args.db_file, profile_name)
+    # }}}
