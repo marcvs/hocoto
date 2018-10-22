@@ -85,15 +85,6 @@ def eventHandler(eventSource, peerId, channel, variableName, value):# {{{
 # }}}
 def profile_generator(profilename, day_short_name, temps):# {{{
     '''Generate profiles for given weekday'''
-    now = datetime.datetime.now()
-    days = {'mon': 'MONDAY',
-            'tue': 'TUESDAY',
-            'wed': 'WEDNESDAY',
-            'thu': 'THURSDAY',
-            'fri': 'FRIDAY',
-            'sat': 'SATURDAY',
-            'sun': 'SUNDAY',
-            'today': now.strftime("%A").upper() }
     day_name = days[day_short_name]
 
     t_lo    = temps['t_lo']
@@ -148,6 +139,15 @@ def profile_generator(profilename, day_short_name, temps):# {{{
 # Global variables{{{
 allowed_profile_names = ["fma", "ma", "t", "ta", "a"]
 weekdays              = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+now = datetime.datetime.now()
+days = {'mon': 'MONDAY',
+        'tue': 'TUESDAY',
+        'wed': 'WEDNESDAY',
+        'thu': 'THURSDAY',
+        'fri': 'FRIDAY',
+        'sat': 'SATURDAY',
+        'sun': 'SUNDAY',
+        'today': now.strftime("%A").upper() }
 default_t_lo          = 17.0
 default_t_med         = 19.0
 default_t_high        = 20.0
@@ -327,7 +327,6 @@ logging.basicConfig(level=loglevel, format=logformat, filename=args.logfile)
 # logging.debug('homematirc_profiler- v.0.0.3')
 # }}}
 logging.info(' '.join(sys.argv))
-
 init_sqlite_tables(args.db_file)
 
 if args.put_t: # put a temperature value # {{{
@@ -435,11 +434,18 @@ if args.pull_from_device: # {{{
         exit(6)
 
     # get profile for device from device
+    dev_profile={}
     if not dry_run:
         hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
         device_profile = hg.getParamset(args.device, 0, "MASTER")
         logging.info('got profile for %d from homegear' % (args.device))
-        print (json.dumps(device_profile, sort_keys=False, indent=4, separators=(',', ': ')))
+        for day in weekdays:
+            dev_profile[day]={}
+            day_name = days[day]
+            for num in range (1, 14):
+                dev_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)] = device_profile["TEMPERATURE_%s_%d"%(day_name, num)]
+                dev_profile[day]["ENDTIME_%s_%d"%(day_name, num)]     = device_profile["ENDTIME_%s_%d"%(day_name, num)]
+        # print (json.dumps(dev_profile, sort_keys=False, indent=4, separators=(',', ': ')))
 
     # get profile for device from database
     db_profile={}
@@ -447,6 +453,31 @@ if args.pull_from_device: # {{{
         db_profile_name = read_profile_entry_from_db(args.db_file, args.device, day)
         temps           = read_temps_entry_from_db(args.db_file, args.device)
         db_profile[day] = profile_generator(db_profile_name, day, temps)
-    print (json.dumps(db_profile, sort_keys=False, indent=4, separators=(',', ': ')))
+    # print (json.dumps(db_profile, sort_keys=False, indent=4, separators=(',', ': ')))
+
+    for day in weekdays:
+        day_name = days[day]
+        for num in range (1, 14):
+            diff_temp = dev_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)] - \
+                         db_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)]
+            diff_time = dev_profile[day]["ENDTIME_%s_%d"%(day_name, num)] - \
+                         db_profile[day]["ENDTIME_%s_%d"%(day_name, num)]
+            if diff_temp != 0 or diff_time !=0:
+                temp_a = dev_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)]
+                temp_b =  db_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)]
+                time_a = dev_profile[day]["ENDTIME_%s_%d"%(day_name, num)]
+                time_b =  db_profile[day]["ENDTIME_%s_%d"%(day_name, num)]
+                print ('%(day)s: Different values in step %(num)d:\n'\
+                        '    TEMP: %(temp_a)d != %(temp_b)d\n'\
+                        '    TIME: %(time_a)d != %(time_b)d' % locals())
+            # else:
+                # tempa = dev_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)]
+                # tempb =  db_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)]
+                # timea = dev_profile[day]["ENDTIME_%s_%d"%(day_name, num)]
+                # timeb =  db_profile[day]["ENDTIME_%s_%d"%(day_name, num)]
+                # print ('%(day)s: Same values in step %(num)d:\n'\
+                #         '    TEMP: %(tempa)d != %(tempb)d\n'\
+                #         '    TIME: %(timea)d != %(timeb)d' % locals())
+
 
 # }}}
