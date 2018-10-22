@@ -60,6 +60,7 @@ def parseOptions():# {{{
     parser.add_argument('--get',           action='store_true', default=False)
     parser.add_argument('--get-t',         action='store_true', default=False)
     parser.add_argument('--get-all',       action='store_true', default=False)
+    parser.add_argument('--pull-from-device', action='store_true', default=False)
     parser.add_argument('--db-file',       default='/var/tmp/homematic_profile.db')
     parser.add_argument('--t-lo',          type=float,            default=0.0)
     parser.add_argument('--t-med',         type=float,            default=0.0)
@@ -144,14 +145,14 @@ def profile_generator(profilename, day_short_name, temps):# {{{
     return(params)
 # }}}
 
-# Global variables
+# Global variables{{{
 allowed_profile_names = ["fma", "ma", "t", "ta", "a"]
 weekdays              = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 default_t_lo          = 17.0
 default_t_med         = 19.0
 default_t_high        = 20.0
 default_t_hottt       = 21.0
-
+# }}}
 ################### sqlite ##############
 def dict_factory(cursor, row):# {{{
     '''helper for json export from sqlite'''
@@ -426,4 +427,26 @@ if args.get_all: # {{{
     for day in weekdays:
         temps[day] = read_profile_entry_from_db(args.db_file, args.device, day)
     print (str(temps))
+# }}}
+if args.pull_from_device: # {{{
+    # sanity checking:
+    if args.device is None:
+        print("device is not specified but required when using --put")
+        exit(6)
+
+    # get profile for device from device
+    if not dry_run:
+        hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
+        device_profile = hg.getParamset(args.device, 0, "MASTER")
+        logging.info('got profile for %d from homegear' % (args.device))
+        print (json.dumps(device_profile, sort_keys=False, indent=4, separators=(',', ': ')))
+
+    # get profile for device from database
+    db_profile={}
+    for day in weekdays:
+        db_profile_name = read_profile_entry_from_db(args.db_file, args.device, day)
+        temps           = read_temps_entry_from_db(args.db_file, args.device)
+        db_profile[day] = profile_generator(db_profile_name, day, temps)
+    print (json.dumps(db_profile, sort_keys=False, indent=4, separators=(',', ': ')))
+
 # }}}
