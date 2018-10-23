@@ -54,19 +54,21 @@ def parseOptions():# {{{
     parser.add_argument('--device',        type=int)
     parser.add_argument('--day',           choices = weekdays)
     parser.add_argument('--profile_name',  '--mode',            choices = allowed_profile_names)
-    parser.add_argument('--put',           action='store_true', default=False)
-    parser.add_argument('--put-t',         action='store_true', default=False)
-    parser.add_argument('--put-all',       action='store_true', default=False)
-    parser.add_argument('--get',           action='store_true', default=False)
-    parser.add_argument('--get-t',         action='store_true', default=False)
-    parser.add_argument('--get-all',       action='store_true', default=False)
-    parser.add_argument('--pull-from-device', action='store_true', default=False)
-    parser.add_argument('--store-profile', default=None)
+    parser.add_argument('--put',           action='store_true',     default=False)
+    parser.add_argument('--put-t',         action='store_true',     default=False)
+    parser.add_argument('--put-all',       action='store_true',     default=False)
+    parser.add_argument('--get',           action='store_true',     default=False)
+    parser.add_argument('--get-t',         action='store_true',     default=False)
+    parser.add_argument('--get-all',       action='store_true',     default=False)
+    parser.add_argument('--pull-from-device', action='store_true',  default=False)
+    parser.add_argument('--create-profile',                         default=None)
+    parser.add_argument('--create-all-profiles',action='store_true',default=None)
+    parser.add_argument('--get-profile',                            default=None)
     parser.add_argument('--db-file',       default='/var/tmp/homematic_profile.db')
-    parser.add_argument('--t-lo',          type=float,            default=0.0)
-    parser.add_argument('--t-med',         type=float,            default=0.0)
-    parser.add_argument('--t-high',        type=float,            default=0.0)
-    parser.add_argument('--t-hottt',       type=float,            default=0.0)
+    parser.add_argument('--t-lo',          type=float,              default=0.0)
+    parser.add_argument('--t-med',         type=float,              default=0.0)
+    parser.add_argument('--t-high',        type=float,              default=0.0)
+    parser.add_argument('--t-hottt',       type=float,              default=0.0)
 
     args = parser.parse_args()
     # print(parser.format_values())
@@ -374,19 +376,37 @@ def store_profile_in_db(db_file, profile_name):# {{{
             cur.execute(query)
             conn.commit()
             rows=cur.rowcount
-            print ("Rows: %d" % rows)
             if cur.rowcount == 0:
                 query = '''insert into profiles values (%d, %d, '%s', %d) ''' %\
                         (profile_id, i,
                          profile['TEMPERATURE_WEEKDAY_%d'%i], profile['ENDTIME_WEEKDAY_%d'%i])
                 cur.execute(query)
                 conn.commit()
-                print ("insert")
-            else:
-                print ("update")
+                # print ("insert")
+            # else:
+                # print ("update")
         except sqlite3.OperationalError as e:
             print ("SQL read error: " + str(e))
     conn.close()
+# }}}
+def get_profile_from_db(db_file, profile_name):# {{{
+    profile_id = get_profile_id_by_name(db_file, profile_name)
+
+    for i in range (1, 14):
+        try:
+            # Setup SQL connection # {{{
+            conn = sqlite3.connect(db_file)
+            conn.row_factory = dict_factory
+            cur = conn.cursor()
+            # }}}
+            query = '''select * from profiles WHERE profile_id=%d ''' % (profile_id)
+            cur.execute(query)
+            conn.commit()
+            allentries = cur.fetchall()
+        except sqlite3.OperationalError as e:
+            print ("SQL read error: " + str(e))
+    conn.close()
+    return(allentries)
 # }}}
 ################### /sqlite ##############
 
@@ -557,9 +577,21 @@ if args.pull_from_device: # {{{
 
 
 # }}}
-if args.store_profile is not None:
-    profile_name = args.store_profile
-    # print ("Profile to store in DB: %s" % profile_name)
-
+if args.create_profile is not None:
+    profile_name = args.create_profile
     store_profile_in_db(args.db_file, profile_name)
     # }}}
+if args.create_all_profiles is not None:
+    for profile_name in allowed_profile_names:
+        store_profile_in_db(args.db_file, profile_name)
+    # }}}
+if args.get_profile is not None:
+    profile_name = args.get_profile
+    raw_profile = get_profile_from_db(args.db_file, profile_name)
+    profile=[]
+    for p in raw_profile:
+        profile.append({})
+        profile[-1]['number'] = p['number']
+        profile[-1]['temp']   = p['temp']
+        profile[-1]['time']   = p['time']
+    print (json.dumps(profile, sort_keys=False, indent=4, separators=(',', ': ')))
