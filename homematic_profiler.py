@@ -491,6 +491,7 @@ if args.put:# profile # {{{
     store_profile_entry_in_db(args.db_file, args.device, args.day, args.profile_name)
 
     ### TODO: This stuff could go to "args.store or args.transfer"
+    temps        = read_temps_entry_from_db(args.db_file, args.device)
     profile = profile_generator(args.profile_name, args.day, temps)
     if not dry_run:
         hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
