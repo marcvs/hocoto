@@ -526,7 +526,7 @@ if args.get_all: # {{{
 if args.pull_from_device: # {{{
     # sanity checking:
     if args.device is None:
-        print("device is not specified but required when using --put")
+        print("device is not specified but required")
         exit(6)
 
     # get profile for device from device
