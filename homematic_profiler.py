@@ -470,9 +470,9 @@ if args.put_all:# {{{
         if not dry_run:
             hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
             hg.putParamset(args.device, 0, "MASTER", profile)
-            logging.info('sending profile %s for %s to homegear' % (profile_name, day))
+            logging.info('sending profile %s for %s to homegear device' % (profile_name, day, args.device))
         if args.verbose:
-            logging.info('putting profile %s for %s' % (profile_name, day))
+            logging.info('sending profile %s for %s to homegear device' % (profile_name, day, args.device))
 # }}}
 if args.put:# profile # {{{
     # sanity checking:
