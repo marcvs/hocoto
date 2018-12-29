@@ -555,6 +555,8 @@ if args.pull_from_device: # {{{
     for day in weekdays:
         day_name = days[day]
         for num in range (1, 14):
+            # print (json.dumps(dev_profile, sort_keys=False, indent=4, separators=(',', ': ')))
+            # print (json.dumps(db_profile, sort_keys=False, indent=4, separators=(',', ': ')))
             diff_temp = dev_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)] - \
                          db_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)]
             diff_time = dev_profile[day]["ENDTIME_%s_%d"%(day_name, num)] - \
