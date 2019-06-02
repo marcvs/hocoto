@@ -532,7 +532,7 @@ if args.device_get_t:
         hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
         # device_profile = hg.getParamset(args.device, 0, "MASTER")
         device_profile = hg.getAllConfig()
-        print (json.dumps(device_profile, sort_keys=False, indent=4, separators=(',', ': ')))
+        print (json.dumps(device_profile, sort_keys=True, indent=4, separators=(',', ': ')))
         
 
 
