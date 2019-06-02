@@ -471,9 +471,9 @@ if args.put_all:# {{{
         if not dry_run:
             hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
             hg.putParamset(args.device, 0, "MASTER", profile)
-            logging.info('sending profile %s for %s to homegear' % (profile_name, day))
+            logging.info('sending profile %s for %s to homegear device %d' % (profile_name, day, args.device))
         if args.verbose:
-            logging.info('putting profile %s for %s' % (profile_name, day))
+            logging.info('sending profile %s for %s to homegear device %d ' % (profile_name, day, args.device))
 # }}}
 if args.put:# profile # {{{
     # sanity checking:
@@ -570,6 +570,8 @@ if args.pull_from_device: # {{{
     for day in weekdays:
         day_name = days[day]
         for num in range (1, 14):
+            # print (json.dumps(dev_profile, sort_keys=False, indent=4, separators=(',', ': ')))
+            # print (json.dumps(db_profile, sort_keys=False, indent=4, separators=(',', ': ')))
             diff_temp = dev_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)] - \
                          db_profile[day]["TEMPERATURE_%s_%d"%(day_name, num)]
             diff_time = dev_profile[day]["ENDTIME_%s_%d"%(day_name, num)] - \
