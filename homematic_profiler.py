@@ -527,9 +527,6 @@ if args.get_all: # {{{
 # }}}
 if args.device_get_t: 
     # sanity checking:
-    if args.device is None:
-        print("device is not specified but required")
-        exit(6)
 
     if not dry_run:
         hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
