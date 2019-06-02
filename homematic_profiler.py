@@ -60,6 +60,7 @@ def parseOptions():# {{{
     parser.add_argument('--get',           action='store_true',     default=False)
     parser.add_argument('--get-t',         action='store_true',     default=False)
     parser.add_argument('--get-all',       action='store_true',     default=False)
+    parser.add_argument('--device-get-t',  action='store_true',     default=False)
     parser.add_argument('--pull-from-device', action='store_true',  default=False)
     parser.add_argument('--create-profile',                         default=None)
     parser.add_argument('--create-all-profiles',action='store_true',default=None)
@@ -524,6 +525,20 @@ if args.get_all: # {{{
         temps[day] = read_profile_entry_from_db(args.db_file, args.device, day)
     print (str(temps))
 # }}}
+if args.device_get_t: 
+    # sanity checking:
+    if args.device is None:
+        print("device is not specified but required")
+        exit(6)
+
+    if not dry_run:
+        hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
+        # device_profile = hg.getParamset(args.device, 0, "MASTER")
+        device_profile = hg.getAllConfig()
+        print (json.dumps(device_profile, sort_keys=False, indent=4, separators=(',', ': ')))
+        
+
+
 if args.pull_from_device: # {{{
     # sanity checking:
     if args.device is None:
