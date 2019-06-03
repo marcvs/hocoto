@@ -35,10 +35,11 @@ def parseOptions():# {{{
     parser.add('-c', '--my-config', is_config_file=True, help='config file path')
 
     parser.add_argument('--verbose', '-v', action="count", default=0, help='Verbosity')
-    parser.add_argument('--device','-d',   type=int)
+    parser.add_argument('--device','-d',   type=int, default=-1)
+    parser.add_argument('--temp','-t',   type=float, default=16.5)
     parser.add_argument('--mode','-m', 
         help="0:AUTO-MODE, 1:MANU-MODE,  2:PARTY-MODE, 3:BOOST-MODE",
-        type=int, default=99)
+        type=int, default=-1)
 
     args = parser.parse_args()
     # print(parser.format_values())
@@ -60,27 +61,27 @@ MODES=[ 'AUTO_MODE' ,'MANU_MODE' ,'PARTY_MODE' ,'BOOST_MODE']
 
 print (" Desired mode: {}".format(MODES[args.mode]))
 
-if (args.device):
+if (args.device != -1):
     devices = [args.device]
 else:
     devices = range (1, 7)
-print ("+-------+-----+------------+------+")
-print ("| State | Dev |  Mode      | Temp |")
-print ("+-------+-----+------------+------+")
+print ("+-------+-----+-----------------+------------+------+")
+print ("| State | Dev#|  Name           |  Mode      | Temp |")
+print ("+-------+-----+-----------------+------------+------+")
 for device in devices:
     mode = hg.getValue(device, 4, "CONTROL_MODE")
     temp = hg.getValue(device, 4, "SET_TEMPERATURE")
-    print("| Old   | {: ^3} | {: <10} | {: <4} |".format(device, MODES[mode], temp))
+    name = hg.getName(device)
+    print("| Old   | {: ^3} | {: <15} | {: <10} | {: <4} |".format(device, name, MODES[mode], temp))
 
-    if (args.mode != 99):
+    if (args.mode != -1):
         hg.setValue(device, 4, MODES[args.mode], True)
-        hg.setValue(device, 4, "SET_TEMPERATURE", 16.5)
+        hg.setValue(device, 4, "SET_TEMPERATURE", args.temp)
 
         mode = hg.getValue(device, 4, "CONTROL_MODE")
         temp = hg.getValue(device, 4, "SET_TEMPERATURE")
-        print("| New   | {: ^3} | {: <10} | {: <4} |".format(device, MODES[mode], temp))
+        print("| New   | {: ^3} | {: <15} | {: <10} | {: <4} |".format(device, name, MODES[mode], temp))
 
-    print ("+-------+-----+------------+------+")
+    print ("+-------+-----+-----------------+------------+------+")
 
-print("done")
-
+del(hg)
