@@ -74,13 +74,14 @@ for device in devices:
     name = hg.getName(device)
     print("| Curr  | {: ^3} | {: <15} | {: <10} | {: <4} |".format(device, name, MODES[mode], temp))
 
-    if (args.mode != -1):
+    if (args.mode != -1 or temp != args.temp):
         hg.setValue(device, 4, MODES[args.mode], True)
         hg.setValue(device, 4, "SET_TEMPERATURE", args.temp)
 
         mode = hg.getValue(device, 4, "CONTROL_MODE")
         temp = hg.getValue(device, 4, "SET_TEMPERATURE")
         print("| New   | {: ^3} | {: <15} | {: <10} | {: <4} |".format(device, name, MODES[mode], temp))
+        print ("+.......+.....+.................+............+......+")
 
 print ("+-------+-----+-----------------+------------+------+")
 
