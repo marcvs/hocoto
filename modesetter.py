@@ -72,7 +72,7 @@ for device in devices:
     mode = hg.getValue(device, 4, "CONTROL_MODE")
     temp = hg.getValue(device, 4, "SET_TEMPERATURE")
     name = hg.getName(device)
-    print("| Old   | {: ^3} | {: <15} | {: <10} | {: <4} |".format(device, name, MODES[mode], temp))
+    print("| Curr  | {: ^3} | {: <15} | {: <10} | {: <4} |".format(device, name, MODES[mode], temp))
 
     if (args.mode != -1):
         hg.setValue(device, 4, MODES[args.mode], True)
@@ -82,6 +82,6 @@ for device in devices:
         temp = hg.getValue(device, 4, "SET_TEMPERATURE")
         print("| New   | {: ^3} | {: <15} | {: <10} | {: <4} |".format(device, name, MODES[mode], temp))
 
-    print ("+-------+-----+-----------------+------------+------+")
+print ("+-------+-----+-----------------+------------+------+")
 
 del(hg)
