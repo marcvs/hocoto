@@ -36,7 +36,7 @@ def parseOptions():# {{{
 
     parser.add_argument('--verbose', '-v', action="count", default=0, help='Verbosity')
     parser.add_argument('--device','-d',   type=int, default=-1)
-    parser.add_argument('--temp','-t',   type=float, default=16.5)
+    parser.add_argument('--temp','-t',     type=float, default=-1)
     parser.add_argument('--mode','-m', 
         help="0:AUTO-MODE, 1:MANU-MODE,  2:PARTY-MODE, 3:BOOST-MODE",
         type=int, default=-1)
@@ -74,14 +74,15 @@ for device in devices:
     name = hg.getName(device)
     print("| Curr  | {: ^3} | {: <15} | {: <10} | {: <4} |".format(device, name, MODES[mode], temp))
 
-    if (args.mode != -1 or temp != args.temp):
+    if (args.mode != -1 or (args.temp != -1 and temp != args.temp)):
         hg.setValue(device, 4, MODES[args.mode], True)
         hg.setValue(device, 4, "SET_TEMPERATURE", args.temp)
 
         mode = hg.getValue(device, 4, "CONTROL_MODE")
         temp = hg.getValue(device, 4, "SET_TEMPERATURE")
         print("| New   | {: ^3} | {: <15} | {: <10} | {: <4} |".format(device, name, MODES[mode], temp))
-        print ("+.......+.....+.................+............+......+")
+        if device != devices[-1]:
+            print ("+.......+.....+.................+............+......+")
 
 print ("+-------+-----+-----------------+------------+------+")
 
