@@ -63,14 +63,17 @@ print (" Desired mode: {}".format(MODES[args.mode]))
 if (args.device != -1):
     devices = [args.device]
 else:
-    devices = range (1, 7)
+    devices = range (1, 8)
 print ("+-------+-----+-----------------+------------+------+")
 print ("| State | Dev#|  Name           |  Mode      | Temp |")
 print ("+-------+-----+-----------------+------------+------+")
 for device in devices:
-    mode = hg.getValue(device, 4, "CONTROL_MODE")
-    temp = hg.getValue(device, 4, "SET_TEMPERATURE")
-    name = hg.getName(device)
+    try:
+        mode = hg.getValue(device, 4, "CONTROL_MODE")
+        temp = hg.getValue(device, 4, "SET_TEMPERATURE")
+        name = hg.getName(device).lstrip('"').rstrip('"')
+    except:
+       continue
     print("| Curr  | {: ^3} | {: <15} | {: <10} | {: <4} |".format(device, name, MODES[mode], temp))
 
     if (args.mode != -1 or (args.temp != -1 and temp != args.temp)):
