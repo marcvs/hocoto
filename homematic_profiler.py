@@ -526,7 +526,7 @@ if args.get_all: # {{{
         temps[day] = read_profile_entry_from_db(args.db_file, args.device, day)
     print (str(temps))
 # }}}
-if args.device_get_t: 
+if args.device_get_t:# {{{
     # sanity checking:
 
     if not dry_run:
@@ -534,7 +534,7 @@ if args.device_get_t:
         # device_profile = hg.getParamset(args.device, 0, "MASTER")
         device_profile = hg.getAllConfig()
         print (json.dumps(device_profile, sort_keys=True, indent=4, separators=(',', ': ')))
-        
+# }}}
 
 
 if args.pull_from_device: # {{{
