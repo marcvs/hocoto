@@ -140,14 +140,12 @@ if args.visualise:
         print ("you must specify a device")
         exit (1)
     if args.day:
-        view_days = args.day
+        view_days = [args.day]
     else:
         view_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
     print (F"Days: {days}")
     for day in view_days:
-        print (F"Day: {day}")
-
         day_name = days[day]
 
         if not dry_run:
@@ -157,7 +155,6 @@ if args.visualise:
 
             profile_dict = split_profiles_by_days (device_profile)
             # print (json.dumps(profile_dict[day], sort_keys=True, indent=4, separators=(',', ': ')))
-            print (F"{device_name} - {day_name}")
             if args.tableview:
                 for num in range(1, 13):
                     total_minutes = profile_dict[day]["ENDTIME_%s_%d"%(day_name, num)]
@@ -192,7 +189,9 @@ if args.visualise:
                         if (time-1) % (180/time_divisor) == 0:
                             sys.stdout.write('\b|')
                         if (temp % 2 == 0):
-                            sys.stdout.write('\b.')
+                            sys.stdout.write('\b-')
+                        if (temp % 2 == 0) and ((time-1) % (180/time_divisor) == 0):
+                            sys.stdout.write('\b+')
                 sys.stdout.write('\n')
 
             sys.stdout.write('     ')
