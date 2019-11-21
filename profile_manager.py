@@ -55,6 +55,7 @@ def parseOptions():
     parser.add_argument('--verbose', '-v',       action="count", default=0, help='Verbosity')
     parser.add_argument('--device',              type=int)
     parser.add_argument('--plot',                action='store_true',     default=False)
+    parser.add_argument('--dump',                action='store_true',     default=False)
     parser.add_argument('--get',                 action='store_true',     default=False)
     parser.add_argument('--put',                 action='store_true',     default=False)
     parser.add_argument('--tableview','--table', action='store_true',     default=False)
@@ -62,11 +63,10 @@ def parseOptions():
     parser.add_argument('--daynum')
     # parser.add_argument('--day',                 choices = weekdays)
     parser.add_argument('--copy',                action='store_true',     default=False)
-    parser.add_argument('--fr', '--from',        type=int, default=0)
-    parser.add_argument('--to',                  type=int, default=0)
+    parser.add_argument('--todev',               type=int, default=0)
     parser.add_argument('--fromday',             choices = weekdays)
     parser.add_argument('--today',               choices = weekdays)
-    parser.add_argument('--width',               type=int, default=80)
+    parser.add_argument('--width',               type=int, default=40)
 
     args = parser.parse_args()
     # print(parser.format_values())
@@ -117,11 +117,12 @@ class HomematicDayProfile():
         self.steps_stored            += 1
 
     def get_profile_step(self, step):
+        '''get single timestep of a profile'''
         return (self.time[step], self.temp[step])
 
     def __repr_table__(self):
         rv=''
-        for num in range(1, 13):
+        for num in range(1, 14):
             total_minutes = self.time[num]
             hours = int(total_minutes / 60)
             minutes = total_minutes - hours*60
@@ -182,6 +183,16 @@ class HomematicDayProfile():
         rv += ("\b{:>2}".format(24))
         rv += ('\n')
         return rv
+    def __repr_dump__(self, day='mon'):
+        '''dump a homematic compatible dict for given day'''
+        rv_dict={}
+
+        dayname = daynames[day]
+        for num in range(1, 14):
+            rv_dict[F"ENDTIME_{dayname}_{num}"] = self.time[num-1]
+            rv_dict[F"TEMPERATURE_{dayname}_{num}"] = self.temp[num-1]
+        return rv_dict
+
 
 
 class HomematicProfile():
@@ -211,6 +222,7 @@ class HomematicProfile():
                 # profile_dict[day][time][num] = profile["ENDTIME_%s_%d"%(day_name, num)]
                 self.hm_day_profiles[day].add_step(profile["TEMPERATURE_%s_%d"%(day_name, num)],
                                                    profile["ENDTIME_%s_%d"%(day_name, num)])
+                # print (F"set: {num}")
 
     def get_profile(self, days=None):
         '''Get homematic profile for given weekday(s)'''
@@ -230,10 +242,6 @@ class HomematicProfile():
                 output_dict["ENDTIME_%s_%d"%(day_name, num)]     = time
                 output_dict["TEMPERATURE_%s_%d"%(day_name, num)] = temp
 
-    # def __repr__(self, style='table', days=None):
-    #     '''return representation of this profile'''
-    #     return getattr(self, '__repr_{}__'.format(style), days=days)
-
     def __repr_table__(self, days=None):
         '''Table view of the profile'''
         rv = ''
@@ -244,6 +252,31 @@ class HomematicProfile():
         for day in days:
             rv += F"{daynames[day]}\n"
             rv += self.hm_day_profiles[day].__repr_table__()
+        return rv
+
+    def __repr_tables_multi__(self):
+        rv = ''
+        plots = {}
+        lines = {}
+        # convert plots to lines
+        for day in weekdays:
+            plots[day] = hm_profile.__repr_table__(days=day)
+            lines[day] = plots[day].split('\n')
+
+        maxlines = 0
+        for day in weekdays:
+            if len(lines[day]) > maxlines:
+                maxlines = len(lines[day]) 
+
+        for i in range (0, maxlines-1):
+            for day in weekdays:
+                try:
+                    entry = lines[day][i].rstrip('\n')
+                    rv += F"{entry:<15}| "
+                except IndexError:
+                    rv += "{:<15}| ".format(" ")
+
+            rv += "\n"
         return rv
 
     def __repr_plot__(self, width=40, days=None):
@@ -264,7 +297,7 @@ class HomematicProfile():
         lines = {}
         do_summary = False
         if plots_per_row == 3:
-            do_summary = True 
+            do_summary = True
         plots_per_row  -= 1
         blocks_to_plot = int (7 / plots_per_row - 0.1)+1
         rv = ''
@@ -286,6 +319,17 @@ class HomematicProfile():
                     if i < len(lines):
                         rv += (F"{lines[weekdays[i]][line]}  ")
                 rv += ("\n")
+        return rv
+
+    def __repr_dump__(self, day_in=None, day_out=None):
+        if day_in is not None:
+            return (self.hm_day_profiles[day_in].__repr_dump__(day_out))
+        rv={}
+        for day in weekdays:
+            temp = self.hm_day_profiles[day].__repr_dump__(day)
+            for entry in temp:
+                rv[entry] = temp[entry]
+                # print (F"  entry: {entry}")
         return rv
 
 
@@ -499,19 +543,54 @@ def get_fake_paramset():
 if not dry_run:
     hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
     device_profile = hg.getParamset(args.device, 0, "MASTER")
+    # print (json.dumps(device_profile, sort_keys=True, indent=4, separators=(',', ': ')))
     device_name    = hg.getName(args.device).lstrip('"').rstrip('"')
 else:
     device_profile = get_fake_paramset()
     device_name    = "testing"
 
 hm_profile         = HomematicProfile(device_profile)
+# print (json.dumps(hm_profile, sort_keys=True, indent=4, separators=(',', ': ')))
 
-print (F"{device_name}")
+print (F"{device_name}\n")
 if args.tableview:
-    print (hm_profile.__repr_table__(days=args.day))
+    # print (hm_profile.__repr_table__(days=args.day))
+    print (hm_profile.__repr_tables_multi__())
 # print (hm_profile.__repr_plot__(width=args.width, days=args.day))
 if args.plot:
     print (hm_profile.__repr_plots_multi__(width=args.width))
+
+if args.copy:
+    if not args.todev:
+        args.todev = args.device
+    target_device_name = hg.getName(args.todev).lstrip('"').rstrip('"')
+    # print (F"Copy from zargs.device} to {args.todev}")
+    print (F"Copy from {device_name} to {target_device_name}")
+    if not args.fromday:
+        # copy all days
+        print ("All days")
+        target_device_profile = hm_profile.__repr_dump__()
+        temp_profile = HomematicProfile(target_device_profile)
+        # print (temp_profile.__repr_table__(days=args.fromday))
+        print (temp_profile.__repr_plots_multi__(width=args.width))
+    elif not args.today:
+        print("You must specify --today if you specify --fromday")
+        exit (3)
+    if args.today:
+        print (F"{args.fromday} => {args.today}")
+        target_device_profile = hm_profile.__repr_dump__(args.fromday, args.today)
+        temp_profile = HomematicProfile(profile=target_device_profile, days=args.today)
+        # print (temp_profile.__repr_table__(days=args.today))
+        print (temp_profile.__repr_plot__(days=args.today))
+    # print (json.dumps(target_device_profile, sort_keys=True, indent=4, separators=(',', ': ')))
+    if (args.device == args.todev) and (args.fromday == args.today):
+        print ("Cowardly refusing to use target with identical destination")
+        exit (6)
+    if not dry_run:
+        hg.putParamset(args.todev, 0, "MASTER", target_device_profile)
+        # pass
+        print ("Copy complete")
+
 
 
 exit (0)
@@ -567,7 +646,7 @@ if args.visualise:
             profile_dict = split_profiles_by_days (device_profile)
             # print (json.dumps(profile_dict[day], sort_keys=True, indent=4, separators=(',', ': ')))
             if args.tableview:
-                for num in range(1, 13):
+                for num in range(1, 14):
                     total_minutes = profile_dict[day]["ENDTIME_%s_%d"%(day_name, num)]
                     hours = int(total_minutes / 60)
                     minutes = total_minutes - hours*60
