@@ -9,7 +9,12 @@
 import sys
 import os
 import configargparse
-from homegear import Homegear
+dry_run = False
+try:
+    from homegear import Homegear
+except:
+    print ('homegear python module not found; running in dry profile_name')
+    dry_run = True
 
 def parseOptions():# {{{
     '''Parse the commandline options'''
