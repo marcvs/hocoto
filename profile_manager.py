@@ -51,22 +51,20 @@ def parseOptions():
     parser = configargparse.ArgumentParser(
             default_config_files = config_files,
             description='''test''')
-    parser.add('-c', '--my-config', is_config_file=True, help='config file path')
+    parser.add('--my-config', is_config_file=True, help='config file path')
     parser.add_argument('--verbose', '-v',       action="count", default=0, help='Verbosity')
-    parser.add_argument('--device',              type=int)
-    parser.add_argument('--plot',                action='store_true',     default=False)
+    parser.add_argument('--device',  '-d',       type=int)
+    parser.add_argument('--plot',    '-p',       action='store_true',     default=False)
     parser.add_argument('--dump',                action='store_true',     default=False)
-    parser.add_argument('--get',                 action='store_true',     default=False)
-    parser.add_argument('--put',                 action='store_true',     default=False)
-    parser.add_argument('--tableview','--table', action='store_true',     default=False)
+    parser.add_argument('--table',   '-t',       action='store_true',     default=False)
     parser.add_argument('--day',                 choices = weekdays)
     parser.add_argument('--daynum')
     # parser.add_argument('--day',                 choices = weekdays)
-    parser.add_argument('--copy',                action='store_true',     default=False)
+    parser.add_argument('--copy',    '-c',       action='store_true',     default=False)
     parser.add_argument('--todev',               type=int, default=0)
     parser.add_argument('--fromday',             choices = weekdays)
     parser.add_argument('--today',               choices = weekdays)
-    parser.add_argument('--width',               type=int, default=40)
+    parser.add_argument('--width',   '-w',       type=int, default=40)
 
     args = parser.parse_args()
     # print(parser.format_values())
@@ -526,11 +524,21 @@ def get_fake_paramset():
 (args, parser) = parseOptions()
 
 # Read data
+dp = []
 if not dry_run:
     hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
     device_profile = hg.getParamset(args.device, 0, "MASTER")
-    # print (json.dumps(device_profile, sort_keys=True, indent=4, separators=(',', ': ')))
+    print (json.dumps(device_profile, sort_keys=True, indent=4, separators=(',', ': ')))
     device_name    = hg.getName(args.device).lstrip('"').rstrip('"')
+    # try:
+    #     for i in range (0,10):
+    #         sys.stdout.write(F"Getting channgel {i} ... ")
+    #         dp.append(hg.getParamset(args.device, i, "MASTER"))
+    #         print ("done")
+    # except Exception as e:
+    #     print ("skipped")
+    #     logger.exception(e)
+    # print (json.dumps(dp, sort_keys=True, indent=4, separators=(',', ': ')))
 else:
     device_profile = get_fake_paramset()
     device_name    = "testing"
@@ -543,7 +551,7 @@ if args.dump: # raw dump
 
 hm_profile         = HomematicProfile(device_profile)
 
-if args.tableview:
+if args.table:
     # print (hm_profile.__repr_table__(days=args.day))
     print (hm_profile.__repr_tables_multi__())
 # print (hm_profile.__repr_plot__(width=args.width, days=args.day))
@@ -581,6 +589,7 @@ if args.copy:
         # pass
         print ("Copy complete")
 
+del(hg)
 
 
 exit (0)
@@ -635,7 +644,7 @@ if args.visualise:
 
             profile_dict = split_profiles_by_days (device_profile)
             # print (json.dumps(profile_dict[day], sort_keys=True, indent=4, separators=(',', ': ')))
-            if args.tableview:
+            if args.table:
                 for num in range(1, 14):
                     total_minutes = profile_dict[day]["ENDTIME_%s_%d"%(day_name, num)]
                     hours = int(total_minutes / 60)
