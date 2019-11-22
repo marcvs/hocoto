@@ -35,7 +35,7 @@ def parseOptions():# {{{
     parser.add('-c', '--my-config', is_config_file=True, help='config file path')
 
     parser.add_argument('--verbose', '-v', action="count", default=0, help='Verbosity')
-    parser.add_argument('--device',        type=int)
+    parser.add_argument('--device',        type=int, default=1)
 
     args = parser.parse_args()
     # print(parser.format_values())
@@ -72,5 +72,11 @@ print(hg.setValue(device, 4, "SET_TEMPERATURE", 16.5))
 
 print(hg.getValue(device, 4, "SET_TEMPERATURE"))
 print(hg.getValue(device, 4, "CONTROL_MODE"))
+
+# print(hg.getParamset(device, 4, "MASTER"))
+data = hg.getAllValues(device)
+
+import json
+print (json.dumps(data, sort_keys=False, indent=4, separators=(',', ': ')))
 
 print("done")
