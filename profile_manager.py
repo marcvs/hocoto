@@ -76,11 +76,11 @@ def eventHandler(eventSource, peerId, channel, variableName, value):
     # This callback method is called on Homegear variable changes
     # Note that the event handler is called by a different thread than the main thread. I. e. thread synchronization is
     # needed when you access non local variables.
-    # print("Event handler called with arguments: source: " + eventSource + \
-    #         ";\n     peerId: " + str(peerId) + \
-    #         ";\n     channel: " + str(channel) + \
-    #         ";\n     variable name: " + variableName + \
-    #         ";\n     value: " + str(value))
+    print("Event handler called with arguments: source: " + eventSource + \
+            ";\n     peerId: " + str(peerId) + \
+            ";\n     channel: " + str(channel) + \
+            ";\n     variable name: " + variableName + \
+            ";\n     value: " + str(value))
     pass
 
 def split_profiles_by_days(profile):
@@ -107,7 +107,6 @@ class HomematicDayProfile():
         self.time         = []
         self.temp         = []
         self.steps_stored = 0
-
     def add_step(self, temp, time):
         '''add one step to a profile'''
         self.time.append(time)
@@ -115,11 +114,9 @@ class HomematicDayProfile():
         # self.time[self.steps_stored] = time
         # self.temp[self.steps_stored] = temp
         self.steps_stored            += 1
-
     def get_profile_step(self, step):
         '''get single timestep of a profile'''
         return (self.time[step], self.temp[step])
-
     def __repr_table__(self):
         rv=''
         for num in range(1, 14):
@@ -194,16 +191,13 @@ class HomematicDayProfile():
         return rv_dict
 
 
-
 class HomematicProfile():
     '''Class to capture homematic profiles'''
     def __init__(self, profile=None, days=None):
         '''init'''
         self.hm_day_profiles = {}
-
         if profile is not None:
             self.set_profile(profile, days)
-
     def set_profile(self, profile, days=None):
         '''add profile to class instance'''
         if days is not None:
@@ -222,8 +216,6 @@ class HomematicProfile():
                 # profile_dict[day][time][num] = profile["ENDTIME_%s_%d"%(day_name, num)]
                 self.hm_day_profiles[day].add_step(profile["TEMPERATURE_%s_%d"%(day_name, num)],
                                                    profile["ENDTIME_%s_%d"%(day_name, num)])
-                # print (F"set: {num}")
-
     def get_profile(self, days=None):
         '''Get homematic profile for given weekday(s)'''
         output_dict = {}
@@ -241,7 +233,6 @@ class HomematicProfile():
                 (time, temp) = self.hm_day_profiles[day].get_step(num)
                 output_dict["ENDTIME_%s_%d"%(day_name, num)]     = time
                 output_dict["TEMPERATURE_%s_%d"%(day_name, num)] = temp
-
     def __repr_table__(self, days=None):
         '''Table view of the profile'''
         rv = ''
@@ -253,7 +244,6 @@ class HomematicProfile():
             rv += F"{daynames[day]}\n"
             rv += self.hm_day_profiles[day].__repr_table__()
         return rv
-
     def __repr_tables_multi__(self):
         rv = ''
         plots = {}
@@ -278,7 +268,6 @@ class HomematicProfile():
 
             rv += "\n"
         return rv
-
     def __repr_plot__(self, width=40, days=None):
         '''Table view of the profile'''
         rv = ''
@@ -290,7 +279,6 @@ class HomematicProfile():
             rv += F"{daynames[day]}\n"
             rv += self.hm_day_profiles[day].__repr_plot__(width = width)
         return rv
-
     def __repr_plots_multi__(self, width, plots_per_row=3):
         '''mutliple plots in a row'''
         plots = {}
@@ -320,7 +308,6 @@ class HomematicProfile():
                         rv += (F"{lines[weekdays[i]][line]}  ")
                 rv += ("\n")
         return rv
-
     def __repr_dump__(self, day_in=None, day_out=None):
         if day_in is not None:
             return (self.hm_day_profiles[day_in].__repr_dump__(day_out))
@@ -331,7 +318,6 @@ class HomematicProfile():
                 rv[entry] = temp[entry]
                 # print (F"  entry: {entry}")
         return rv
-
 
 weekdays       = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 daynames = {'mon': 'MONDAY',
@@ -535,9 +521,9 @@ def get_fake_paramset():
     profile["ENDTIME_SUNDAY_13"]    = 60*24 + 0
     return profile
 
-
+####################################################################################################
+####################################################################################################
 (args, parser) = parseOptions()
-
 
 # Read data
 if not dry_run:
@@ -549,10 +535,14 @@ else:
     device_profile = get_fake_paramset()
     device_name    = "testing"
 
-hm_profile         = HomematicProfile(device_profile)
-# print (json.dumps(hm_profile, sort_keys=True, indent=4, separators=(',', ': ')))
+print (F" {device_name}\n"+("{:=^%d}"%(len(device_name)+2)).format(''))
 
-print (F"{device_name}\n")
+if args.dump: # raw dump
+    print (json.dumps(device_profile, sort_keys=True, indent=4, separators=(',', ': ')))
+    exit(0)
+
+hm_profile         = HomematicProfile(device_profile)
+
 if args.tableview:
     # print (hm_profile.__repr_table__(days=args.day))
     print (hm_profile.__repr_tables_multi__())
