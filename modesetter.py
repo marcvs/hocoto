@@ -39,10 +39,11 @@ def parseOptions():# {{{
             description='''test''')
     parser.add('-c', '--my-config', is_config_file=True, help='config file path')
 
-    parser.add_argument('--verbose', '-v', action="count", default=0, help='Verbosity')
-    parser.add_argument('--device','-d',   type=int, default=-1)
-    parser.add_argument('--temp','-t',     type=float, default=-1)
-    parser.add_argument('--mode','-m', 
+    parser.add_argument('--verbose', '-v',      action="count", default=0, help='Verbosity')
+    parser.add_argument('--device','-d',        type=int, default=-1)
+    parser.add_argument('--temp','-t',          type=float, default=-1)
+    parser.add_argument('--dump',               action='store_true',     default=False)
+    parser.add_argument('--mode','-m',
         help="0:AUTO-MODE, 1:MANU-MODE,  2:PARTY-MODE, 3:BOOST-MODE",
         type=int, default=-1)
 
