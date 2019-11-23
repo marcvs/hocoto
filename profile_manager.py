@@ -117,11 +117,12 @@ class HomematicDayProfile():
         return (self.time[step], self.temp[step])
     def __repr_table__(self):
         rv=''
-        for num in range(1, 14):
+        for num in range(0, 14):
             total_minutes = self.time[num]
             hours = int(total_minutes / 60)
             minutes = total_minutes - hours*60
             # rv += (F"ENDTIME_{day_name}_{num:<2}: ")
+            # rv += ("{}: ".format(num))
             rv += ("{:>2}:{:0<2}".format(hours,minutes))
             rv += (" - ")
             rv += ("{:<}°C\n".format( str(self.temp[num])))
@@ -137,7 +138,7 @@ class HomematicDayProfile():
             n_time_axes = 360 # all xxx minutes
         residual = 0.99
         for temp_int in range(220,159,-5):
-            cur_time_idx = 1
+            cur_time_idx = 0
             temp = temp_int/10.0
             rv += ('{: <5}'.format(temp))
 
