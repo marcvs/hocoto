@@ -42,12 +42,13 @@ def parseOptions():
 
     parser.add_argument('--verbose',    '-v',       action="count", default=0, help='Verbosity')
     parser.add_argument('--device',     '-d',       type=int, default=-1)
-    parser.add_argument('--temp',      '-t',        type=float, default=None)
+    parser.add_argument('--temp',       '-t',       type=float, default=None)
     parser.add_argument('--dump',                   action='store_true',     default=False)
     parser.add_argument('--mode',       '-m',
         help="0:AUTO-MODE, 1:MANU-MODE,  2:PARTY-MODE, 3:BOOST-MODE",
         type=int, default=None)
-    parser.add_argument('--until',      '-u',       type=str, default=None)
+    parser.add_argument('--until',      '-u',       type=str, default=None, help='26.11.19:22:33')
+    parser.add_argument('--start-in',   '-s',       type=int, default=None, help='hours')
 
     args = parser.parse_args()
     # print(parser.format_values())
@@ -85,6 +86,7 @@ for device in devices:
         valv = hg.getValue(device, 4, "VALVE_STATE" )
         bat  = hg.getValue(device, 4, "BATTERY_STATE")
     except:
+        continue
         pass
 
     if mode != 2: # All modes but PARTY:
@@ -135,6 +137,8 @@ for device in devices:
             if ps_year > 1000:
                 ps_year -= 2000
             ps_h     = int(now.hour)
+            if args.start_in:
+                ps_h += int(args.start_in)
             ps_min   = int(now.minute)
 
             px_day   = int(px_day)
