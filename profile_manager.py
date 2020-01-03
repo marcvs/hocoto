@@ -64,7 +64,10 @@ def parseOptions():
     parser.add_argument('--todev',               type=int, default=0)
     parser.add_argument('--fromday',             choices = weekdays)
     parser.add_argument('--today',               choices = weekdays)
-    parser.add_argument('--width',   '-w',       type=int, default=40)
+    parser.add_argument('--width',        '-w',  type=int, default=40)
+    parser.add_argument('--readfromfile', '-r',  default = None)
+    parser.add_argument('--profilename',  '-n',  default = None)
+    parser.add_argument('--writetofile',  '-f',  default = None)
 
     args = parser.parse_args()
     # print(parser.format_values())
@@ -107,27 +110,66 @@ class HomematicDayProfile():
         self.steps_stored = 0
     def add_step(self, temp, time):
         '''add one step to a profile'''
+        if len(self.time) > 0:
+            if self.time[-1] > time:
+                print ("Timestep is lower than previous one. Closing profile.")
+                self.time.append(1440)
+                self.temp.append(self.temp[-1])
         self.time.append(time)
         self.temp.append(temp)
         # self.time[self.steps_stored] = time
         # self.temp[self.steps_stored] = temp
         self.steps_stored            += 1
+    def read_from_file(self, filename, profilename = None):
+        import fileinput
+        current_profilename = None
+        for line in fileinput.input(filename):
+            try:
+                # if line[0] in "abcdefghijklmnopqrstuvwxyz":
+                if line[0] == "#":
+                    continue
+                elif line[0] in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                    if "=" in line:
+                        name = line.split("=")[1].rstrip().lstrip()
+                    else:
+                        name = line.rstrip().lstrip()
+                    if args.verbose:
+                        print (F"\nProfilename: {name}")
+                    current_profilename = name
+                else:
+                    (time, date) = line.split("-")
+                    time = time.lstrip().rstrip()
+                    (hrs, mins) = time.split(":")
+                    minutes = 60*int(hrs) + int(mins)
+                    temp = float(date.lstrip().rstrip().rstrip('C').rstrip('°'))
+                    # print (F"Read: time: ({minutes}) {time} - temp: {temp}")
+                    if current_profilename == profilename:
+                        self.add_step(temp, minutes)
+            except ValueError as e:
+                pass
+                # print (F"exception: {e}\nline: '{line}'")
+        print (self.__repr_table__())
+            
     def get_profile_step(self, step):
         '''get single timestep of a profile'''
         return (self.time[step], self.temp[step])
     def __repr_table__(self):
         rv=''
-        for num in range(0, 14):
-            total_minutes = self.time[num]
-            hours = int(total_minutes / 60)
-            minutes = total_minutes - hours*60
-            # rv += (F"ENDTIME_{day_name}_{num:<2}: ")
-            # rv += ("{}: ".format(num))
-            rv += ("{:>2}:{:0<2}".format(hours,minutes))
-            rv += (" - ")
-            rv += ("{:<}°C\n".format( str(self.temp[num])))
-            if total_minutes == 1440:
-                break
+        try:
+            for num in range(0, 14):
+                total_minutes = self.time[num]
+                hours = int(total_minutes / 60)
+                minutes = total_minutes - hours*60
+                # rv += (F"ENDTIME_{day_name}_{num:<2}: ")
+                # rv += ("{}: ".format(num))
+                rv += ("{:>2}:{:0<2}".format(hours,minutes))
+                rv += (" - ")
+                rv += ("{:<}°C\n".format( str(self.temp[num])))
+                if total_minutes == 1440:
+                    break
+        except IndexError:
+            pass # end of profile...
+
         return rv
     def __repr_plot__(self, width = 80):
         '''plot of the temperature graph'''
@@ -242,6 +284,33 @@ class HomematicProfile():
         for day in days:
             rv += F"{daynames[day]}\n"
             rv += self.hm_day_profiles[day].__repr_table__()
+        return rv
+    def __repr_table_dedup__(self):
+        '''Table view of the profile'''
+        rv = ''
+        days = weekdays
+        for day_num in range (0,7):
+        # for day in days:
+            # rv += F"{daynames[day]}\n"
+            # rv += self.hm_day_profiles[day].__repr_table__()
+            day = weekdays[day_num]
+            dupe_found = False
+            dupe_name = ""
+            cur_day_profile = self.hm_day_profiles[day].__repr_table__()
+            for prev_day_num in range (0,day_num):
+                prev_day = weekdays[prev_day_num]
+                prev_day_profile = self.hm_day_profiles[prev_day].__repr_table__()
+                if cur_day_profile == prev_day_profile:
+                    dupe_found = True
+                    dupe_name  = prev_day
+                    break
+            print (F"{daynames[day]}")
+            if not dupe_found:
+                print (self.hm_day_profiles[day].__repr_table__())
+            else:
+                print (F"Same as {daynames[dupe_name]}\n")
+            
+
         return rv
     def __repr_tables_multi__(self):
         rv = ''
@@ -526,7 +595,11 @@ def get_fake_paramset():
 
 # Read data
 dp = []
-if not dry_run:
+if args.readfromfile:
+    hm_day_profile = HomematicDayProfile()
+    hm_day_profile.read_from_file(args.readfromfile, args.profilename)
+    exit (0)
+elif not dry_run:
     hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
     device_profile = hg.getParamset(args.device, 0, "MASTER")
     device_name    = hg.getName(args.device).lstrip('"').rstrip('"')
@@ -544,10 +617,16 @@ hm_profile         = HomematicProfile(device_profile)
 
 if args.table:
     # print (hm_profile.__repr_table__(days=args.day))
-    print (hm_profile.__repr_tables_multi__())
+    # print (hm_profile.__repr_tables_multi__())
+    print (hm_profile.__repr_table_dedup__())
 # print (hm_profile.__repr_plot__(width=args.width, days=args.day))
 if args.plot:
     print (hm_profile.__repr_plots_multi__(width=args.width))
+if args.writetofile:
+    # FIXME: write to file named args.writetofile
+    with open (args.writetofile, "w") as file:
+        file.write (hm_profile.__repr_table__())
+    exit (0)
 
 if args.copy:
     if not args.todev:
@@ -580,7 +659,7 @@ if args.copy:
         # pass
         print ("Copy complete")
 
-del(hg)
+hg.exit()
 
 
 exit (0)
