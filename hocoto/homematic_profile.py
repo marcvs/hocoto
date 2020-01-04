@@ -13,6 +13,12 @@ from hocoto.weekdays import weekdays, days, daynames
 
 logger = logging.getLogger(__name__)
 
+def ensure_is_list(item):
+    '''Make sure we have a list'''
+    if isinstance(item, str):
+        return [item]
+    return item
+
 class HomematicProfile():
     '''Class to capture homematic profiles'''
     def __init__(self, profile=None, days=None):
@@ -99,7 +105,7 @@ class HomematicProfile():
         lines = {}
         # convert plots to lines
         for day in weekdays:
-            plots[day] = hm_profile.__repr_table__(days=day)
+            plots[day] = self.__repr_table__(days=day)
             lines[day] = plots[day].split('\n')
 
         maxlines = 0
@@ -141,7 +147,7 @@ class HomematicProfile():
 
         # convert plots to lines
         for day in weekdays:
-            plots[day] = hm_profile.__repr_plot__(width=args.width, days=day)
+            plots[day] = self.__repr_plot__(width=args.width, days=day)
             lines[day] = plots[day].split('\n')
 
         for blocks in range (0, blocks_to_plot*plots_per_row, plots_per_row+1):
