@@ -46,11 +46,6 @@ def split_profiles_by_days(profile):
             profile_dict[day]["ENDTIME_%s_%d"%(day_name, num)]     = device_profile["ENDTIME_%s_%d"%(day_name, num)]
     return profile_dict
 
-def ensure_is_list(item):
-    '''Make sure we have a list'''
-    if isinstance(item, str):
-        return [item]
-    return item
 
 
 
