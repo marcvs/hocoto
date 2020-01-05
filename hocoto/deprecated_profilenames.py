@@ -7,8 +7,6 @@
 # pylint: disable=redefined-outer-name, logging-not-lazy
 # pylint: disable=multiple-statements
 
-logger = logging.getLogger(__name__)
-
 allowed_profile_names = ["fma", "ma", "t", "ta", "a", "o"]
 default_t_lo          = 17.0
 default_t_med         = 19.0

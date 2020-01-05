@@ -59,7 +59,6 @@ class HomematicDayProfile():
                 pass
                 # print (F"exception: {e}\nline: '{line}'")
         print (self.__repr_table__())
-            
     def get_profile_step(self, step):
         '''get single timestep of a profile'''
         return (self.time[step], self.temp[step])
@@ -131,14 +130,16 @@ class HomematicDayProfile():
         rv += ("\b{:>2}".format(24))
         rv += ('\n')
         return rv
-    def __repr_dump__(self, day='mon'):
+    # def __repr_dump__(self, day='mon'):
+    def __repr_dump__(self, day=None):
         '''dump a homematic compatible dict for given day'''
         rv_dict={}
-
-        dayname = daynames[day]
+        dayname = ""
+        if day is not None:
+            dayname = daynames[day]
         for num in range(1, 14):
             rv_dict[F"ENDTIME_{dayname}_{num}"] = self.time[num-1]
             rv_dict[F"TEMPERATURE_{dayname}_{num}"] = self.temp[num-1]
         return rv_dict
-
-
+    def __eq__(self, other):
+        return self.__repr_dump__() == other.__repr_dump__()

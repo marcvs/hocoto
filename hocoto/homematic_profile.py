@@ -72,32 +72,28 @@ class HomematicProfile():
             rv += F"{daynames[day]}\n"
             rv += self.hm_day_profiles[day].__repr_table__()
         return rv
-    def __repr_table_dedup__(self):
+    def __repr_table_dedup__(self, days=None):
         '''Table view of the profile'''
         rv = ''
-        days = weekdays
-        for day_num in range (0,7):
-        # for day in days:
-            # rv += F"{daynames[day]}\n"
-            # rv += self.hm_day_profiles[day].__repr_table__()
-            day = weekdays[day_num]
+        if days is not None:
+            days = ensure_is_list (days)
+        else:
+            days = weekdays
+        for day in days:
+            day_num = weekdays.index(day)
             dupe_found = False
             dupe_name = ""
-            cur_day_profile = self.hm_day_profiles[day].__repr_table__()
             for prev_day_num in range (0,day_num):
                 prev_day = weekdays[prev_day_num]
-                prev_day_profile = self.hm_day_profiles[prev_day].__repr_table__()
-                if cur_day_profile == prev_day_profile:
+                if self.hm_day_profiles[day] == self.hm_day_profiles[prev_day]:
                     dupe_found = True
                     dupe_name  = prev_day
                     break
-            print (F"{daynames[day]}")
+            rv += (F"{daynames[day]}\n")
             if not dupe_found:
-                print (self.hm_day_profiles[day].__repr_table__())
+                rv += self.hm_day_profiles[day].__repr_table__()
             else:
-                print (F"Same as {daynames[dupe_name]}\n")
-            
-
+                rv += F"Same as {daynames[dupe_name]}\n"
         return rv
     def __repr_tables_multi__(self):
         rv = ''
@@ -105,7 +101,7 @@ class HomematicProfile():
         lines = {}
         # convert plots to lines
         for day in weekdays:
-            plots[day] = self.__repr_table__(days=day)
+            plots[day] = self.__repr_table_dedup__(days=day)
             lines[day] = plots[day].split('\n')
 
         maxlines = 0
@@ -134,6 +130,44 @@ class HomematicProfile():
             rv += F"{daynames[day]}\n"
             rv += self.hm_day_profiles[day].__repr_plot__(width = width)
         return rv
+    def __repr_plot_dedup__(self, width=40, days=None):
+        '''Table view of the profile'''
+        rv = ''
+        if days is not None:
+            days = ensure_is_list (days)
+        else:
+            days = weekdays
+        for day in days:
+            day_num = weekdays.index(day)
+            dupe_found = False
+            dupe_name = ""
+
+            for prev_day_num in range (0,day_num):
+                prev_day = weekdays[prev_day_num]
+                if self.hm_day_profiles[day] == self.hm_day_profiles[prev_day]:
+                    dupe_found = True
+                    dupe_name  = daynames[prev_day]
+                    break
+            rv += (F"{daynames[day]}\n")
+            if not dupe_found:
+                rv += self.hm_day_profiles[day].__repr_plot__(width = width)
+            else:
+                def string_insert (source_str, insert_str, pos):
+                    return source_str[:pos]+insert_str+source_str[pos:]
+                def string_ins_replace (source_str, insert_str, pos, length):
+                    return source_str[:pos]+insert_str+source_str[pos+length:]
+                tmp = self.hm_day_profiles[day].__repr_plot__(width = width)
+                tmplines = tmp.split('\n')
+                tmplines[2]=string_ins_replace(tmplines[2], "+------------+ ", 20, 41)
+                tmplines[3]=string_ins_replace(tmplines[3], "+            + ", 20, 43)
+                tmplines[4]=string_ins_replace(tmplines[4], "|  same as   |",  34, 80)
+                tmplines[5]=string_ins_replace(tmplines[5], "|  {: <10}|".format(dupe_name), 22, 40)
+                tmplines[6]=string_ins_replace(tmplines[6], "+            + ", 20, 45)
+                tmplines[7]=string_ins_replace(tmplines[7], "+------------+ ", 20, 45)
+                tmp = "\n".join (tmplines)
+                rv += tmp
+
+        return rv
     def __repr_plots_multi__(self, width, plots_per_row=3):
         '''mutliple plots in a row'''
         plots = {}
@@ -147,7 +181,7 @@ class HomematicProfile():
 
         # convert plots to lines
         for day in weekdays:
-            plots[day] = self.__repr_plot__(width=args.width, days=day)
+            plots[day] = self.__repr_plot_dedup__(width=args.width, days=day)
             lines[day] = plots[day].split('\n')
 
         for blocks in range (0, blocks_to_plot*plots_per_row, plots_per_row+1):
@@ -157,10 +191,14 @@ class HomematicProfile():
                 except IndexError:
                     pass
             rv += ('\n')
-            for line in range (1, len(lines[weekdays[-1]])):
+            # for line in range (1, len(lines[weekdays[-1]])):
+            for line in range (1, 10):
                 for i in range (blocks, blocks + plots_per_row + 1):
                     if i < len(lines):
-                        rv += (F"{lines[weekdays[i]][line]}  ")
+                        try:
+                            rv += (F"{lines[weekdays[i]][line]}  ")
+                        except IndexError:
+                            pass
                 rv += ("\n")
         return rv
     def __repr_dump__(self, day_in=None, day_out=None):
@@ -173,5 +211,3 @@ class HomematicProfile():
                 rv[entry] = temp[entry]
                 # print (F"  entry: {entry}")
         return rv
-
-
