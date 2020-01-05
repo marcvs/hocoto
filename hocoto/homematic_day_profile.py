@@ -7,6 +7,9 @@
 # pylint: disable=redefined-outer-name, logging-not-lazy
 # pylint: disable=multiple-statements
 import logging
+import fileinput
+import re
+from hocoto.parse_options_manager import args
 from hocoto.weekdays import weekdays, days, daynames
 
 logger = logging.getLogger(__name__)
@@ -30,35 +33,6 @@ class HomematicDayProfile():
         # self.time[self.steps_stored] = time
         # self.temp[self.steps_stored] = temp
         self.steps_stored            += 1
-    def read_from_file(self, filename, profilename = None):
-        import fileinput
-        current_profilename = None
-        for line in fileinput.input(filename):
-            try:
-                # if line[0] in "abcdefghijklmnopqrstuvwxyz":
-                if line[0] == "#":
-                    continue
-                elif line[0] in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ":
-                    if "=" in line:
-                        name = line.split("=")[1].rstrip().lstrip()
-                    else:
-                        name = line.rstrip().lstrip()
-                    if args.verbose:
-                        print (F"\nProfilename: {name}")
-                    current_profilename = name
-                else:
-                    (time, date) = line.split("-")
-                    time = time.lstrip().rstrip()
-                    (hrs, mins) = time.split(":")
-                    minutes = 60*int(hrs) + int(mins)
-                    temp = float(date.lstrip().rstrip().rstrip('C').rstrip('°'))
-                    # print (F"Read: time: ({minutes}) {time} - temp: {temp}")
-                    if current_profilename == profilename:
-                        self.add_step(temp, minutes)
-            except ValueError as e:
-                pass
-                # print (F"exception: {e}\nline: '{line}'")
-        print (self.__repr_table__())
     def get_profile_step(self, step):
         '''get single timestep of a profile'''
         return (self.time[step], self.temp[step])
@@ -78,7 +52,6 @@ class HomematicDayProfile():
                     break
         except IndexError:
             pass # end of profile...
-
         return rv
     def __repr_plot__(self, width = 80):
         '''plot of the temperature graph'''
@@ -138,8 +111,13 @@ class HomematicDayProfile():
         if day is not None:
             dayname = daynames[day]
         for num in range(1, 14):
-            rv_dict[F"ENDTIME_{dayname}_{num}"] = self.time[num-1]
-            rv_dict[F"TEMPERATURE_{dayname}_{num}"] = self.temp[num-1]
+            try:
+                rv_dict[F"ENDTIME_{dayname}_{num}"] = self.time[num-1]
+                rv_dict[F"TEMPERATURE_{dayname}_{num}"] = self.temp[num-1]
+            except IndexError:
+                break
+            except Exception as e:
+                raise
         return rv_dict
     def __eq__(self, other):
         return self.__repr_dump__() == other.__repr_dump__()

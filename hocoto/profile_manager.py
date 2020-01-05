@@ -41,23 +41,30 @@ except:
     dry_run = True
 
 ####################################################################################################
-
+# defaults:
+device_name = ""
 # Read data
 if args.readfromfile:
-    hm_day_profile = HomematicDayProfile()
-    hm_day_profile.read_from_file(args.readfromfile, args.profilename)
-    exit (0)
+    hm_profile = HomematicProfile()
+    print(hm_profile.get_profilenames_from_file(args.readfromfile))
+
+    # hm_day_profile = HomematicDayProfile()
+    hm_profile.read_from_file(args.readfromfile)
+    # print (hm_profile.__repr_table__())
+    print (hm_profile.__repr_tables_multi__())
+    # exit (0)
 elif not dry_run:
     hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
     device_profile = hg.getParamset(args.device, 0, "MASTER")
     device_name    = hg.getName(args.device).lstrip('"').rstrip('"')
+    hm_profile     = HomematicProfile(device_profile)
 else:
     device_profile = get_fake_paramset()
     device_name    = "testing"
+    hm_profile     = HomematicProfile(device_profile)
 
 print (F" {device_name}\n"+("{:=^%d}"%(len(device_name)+2)).format(''))
 
-hm_profile         = HomematicProfile(device_profile)
 
 
 if args.dump: # raw dump
@@ -76,9 +83,8 @@ if args.plot:
 if args.plot:
     print (hm_profile.__repr_plots_multi__(width=args.width))
 if args.writetofile:
-    # FIXME: write to file named args.writetofile
     with open (args.writetofile, "w") as file:
-        file.write (hm_profile.__repr_table_dedup___())
+        file.write (hm_profile.__repr_table_dedup__())
     exit (0)
 
 if args.copy:

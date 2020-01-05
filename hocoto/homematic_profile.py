@@ -6,10 +6,12 @@
 # pylint: disable=bad-whitespace, mixed-indentation
 # pylint: disable=redefined-outer-name, logging-not-lazy
 # pylint: disable=multiple-statements
+import fileinput
 import logging
+import re
 from hocoto.parse_options_manager import args
 from hocoto.homematic_day_profile import HomematicDayProfile
-from hocoto.weekdays import weekdays, days, daynames
+from hocoto.weekdays import weekdays, daynames, shortnames
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +95,7 @@ class HomematicProfile():
             if not dupe_found:
                 rv += self.hm_day_profiles[day].__repr_table__()
             else:
-                rv += F"Same as {daynames[dupe_name]}\n"
+                rv += F"Same as {daynames[dupe_name]:.7}\n"
         return rv
     def __repr_tables_multi__(self):
         rv = ''
@@ -211,3 +213,75 @@ class HomematicProfile():
                 rv[entry] = temp[entry]
                 # print (F"  entry: {entry}")
         return rv
+    def get_profilenames_from_file(self, filename):
+        profile_names=[]
+        for line in fileinput.input(filename):
+            if line[0] == "#":
+                continue
+            elif re.match("[a-zA-Z]", line[0]):
+                if line[:7] ==  "Same as":
+                    continue
+                elif "=" in line:
+                    profile_names.append(line.split("=")[1].rstrip().lstrip())
+                else:
+                    profile_names.append(line.rstrip().lstrip())
+        return profile_names
+    def read_from_file(self, filename):
+        current_profilename = None
+        same_as = None
+        for line in fileinput.input(filename):
+            # print (F"LINE: {line}  [0]:>{line[0]}<")
+            try:
+                # if line[0] in "abcdefghijklmnopqrstuvwxyz":
+                if line[0] == "#":
+                    continue
+                elif re.match("[a-zA-Z\=]", line[0]):
+                    if line[:7] ==  "Same as":
+                        same_as = line.split("Same as")[1].lstrip().rstrip()
+                        # print (F"                    >>{same_as}<<")
+                    elif line[0] == "=":
+                        same_as = line.split("=")[1].lstrip().rstrip()
+                        # print (F"           ======   >>{same_as}<<")
+                    elif "=" in line:
+                        name = line.split("=")[1].rstrip().lstrip()
+                    else:
+                        name = line.rstrip().lstrip()
+                    if args.verbose:
+                        print (F"\nProfilename: {name}")
+                    current_profilename = name
+                    if current_profilename.upper() in shortnames:
+                            current_profilename = shortnames[current_profilename.upper()]
+                elif line == "\n":
+                    continue
+                else:
+                    (time, date) = line.split("-")
+                    time = time.lstrip().rstrip()
+                    (hrs, mins) = time.split(":")
+                    minutes = 60*int(hrs) + int(mins)
+                    temp = float(date.lstrip().rstrip().rstrip('C').rstrip('°'))
+                    # print (F"Read: time: ({minutes}) {time} - temp: {temp}")
+                    if not current_profilename in self.hm_day_profiles.keys():
+                        self.hm_day_profiles[current_profilename] = HomematicDayProfile()
+                    self.hm_day_profiles[current_profilename].add_step(temp, minutes)
+                    # print (F"storing for profile {current_profilename}")
+                    # if current_profilename == profilename:
+                    #     self.add_step(temp, minutes)
+                if same_as:
+                    # print (F"     -------------- >>{same_as}<<")
+                    if same_as.upper() in shortnames:
+                            same_as = shortnames[same_as.upper()]
+                    self.hm_day_profiles[current_profilename] = self.hm_day_profiles[same_as]
+                    same_as = None
+            except ValueError as e:
+                # pass
+                print (F"exception: {e}\nline: '{line}'")
+                if args.debug:
+                    raise
+        # print ("Listing all profiles read")
+        # for p in self.hm_day_profiles:
+        #     print (p)
+        # print ("done")
+        # import json
+        # print (json.dumps(self.hm_day_profiles, sort_keys=False, indent=4, separators=(',', ': ')))
+        # print (self.__repr_table__())
+
