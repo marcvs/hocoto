@@ -50,12 +50,13 @@ if not dry_run:
 # Read data
 if args.readfromfile:
     hm_profile = HomematicProfile()
-
     # hm_day_profile = HomematicDayProfile()
     hm_profile.read_from_file(args.readfromfile)
     # print (hm_profile.__repr_table__())
     # print (hm_profile.__repr_tables_multi__())
-    device_name    = F'Read from file "{args.readfromfile}"'
+    device_name    = F'File "{args.readfromfile}"'
+    args.copy      = True
+
 elif not dry_run:
     device_profile = hg.getParamset(args.device, 0, "MASTER")
     device_name    = hg.getName(args.device).lstrip('"').rstrip('"')
@@ -78,29 +79,39 @@ if args.table:
 if args.table_dedup:
     print (hm_profile.__repr_table_dedup__())
 if args.plot:
+    # print (hm_profile.__repr_plot_dedup__(width=args.width))
     print (hm_profile.__repr_plots_multi__(width=args.width))
 if args.writetofile:
     with open (args.writetofile, "w") as file:
         file.write (hm_profile.__repr_table_dedup_all__())
     exit (0)
 
-if args.copy:
+if args.copy: # copy from one device to another
     if not args.todev:
+        if not args.device:
+            print ("Error, no device specified")
+            exit (2)
         args.todev = args.device
-    target_device_name = hg.getName(args.todev).lstrip('"').rstrip('"')
+    if not dry_run:
+        target_device_name = hg.getName(args.todev).lstrip('"').rstrip('"')
+    else:
+        target_device_name = "Testing-Target"
     # print (F"Copy from zargs.device} to {args.todev}")
-    print (F"Copy from {device_name} to {target_device_name}")
+    print (F"Copying from {device_name} to {target_device_name}")
     if not args.fromday:
         # copy all days
         print ("All days")
         target_device_profile = hm_profile.__repr_dump__()
         temp_profile = HomematicProfile(target_device_profile)
         # print (temp_profile.__repr_table__(days=args.fromday))
-        print (temp_profile.__repr_plots_multi__(width=args.width))
+        # print (temp_profile.__repr_plots_multi__(width=args.width))
     elif not args.today:
         print("You must specify --today if you specify --fromday")
         exit (3)
     if args.today:
+        if not args.fromday:
+            print("You must specify --fromday if you specify --today")
+            exit (3)
         print (F"{args.fromday} => {args.today}")
         target_device_profile = hm_profile.__repr_dump__(args.fromday, args.today)
         temp_profile = HomematicProfile(profile=target_device_profile, days=args.today)
