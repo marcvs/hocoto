@@ -52,6 +52,7 @@ if args.readfromfile:
     hm_profile.read_from_file(args.readfromfile)
     # print (hm_profile.__repr_table__())
     print (hm_profile.__repr_tables_multi__())
+    device_name    = F'"Read from file "{args.readfromfile}"')
     # exit (0)
 elif not dry_run:
     hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
