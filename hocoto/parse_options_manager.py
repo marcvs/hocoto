@@ -55,7 +55,6 @@ def parseOptions():
     parser.add_argument('--today',               choices = weekdays)
     parser.add_argument('--width',        '-w',  type=int, default=40)
     parser.add_argument('--readfromfile', '-r',  default = None)
-    parser.add_argument('--profilename',  '-n',  default = None)
     parser.add_argument('--writetofile',  '-f',  default = None)
 
     # args = parser.parse_args()
