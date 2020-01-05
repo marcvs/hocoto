@@ -79,8 +79,7 @@ if args.table:
 if args.table_dedup:
     print (hm_profile.__repr_table_dedup__())
 if args.plot:
-    # print (hm_profile.__repr_plot_dedup__(width=args.width))
-    print (hm_profile.__repr_plots_multi__(width=args.width))
+    print (hm_profile.__repr_plots_multi__(width=40))
 if args.writetofile:
     with open (args.writetofile, "w") as file:
         file.write (hm_profile.__repr_table_dedup_all__())

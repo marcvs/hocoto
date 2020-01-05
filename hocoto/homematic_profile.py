@@ -222,7 +222,7 @@ class HomematicProfile():
 
         # convert plots to lines
         for day in weekdays:
-            plots[day] = self.__repr_plot_dedup__(width=args.width, days=day)
+            plots[day] = self.__repr_plot_dedup__(width, days=day)
             lines[day] = plots[day].split('\n')
 
         for blocks in range (0, blocks_to_plot*plots_per_row, plots_per_row+1):
