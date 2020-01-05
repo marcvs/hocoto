@@ -226,7 +226,7 @@ class HomematicProfile():
                     pass
             rv += ('\n')
             # for line in range (1, len(lines[weekdays[-1]])):
-            for line in range (1, 10):
+            for line in range (1, 16):
                 for i in range (blocks, blocks + plots_per_row + 1):
                     if i < len(lines):
                         try:
