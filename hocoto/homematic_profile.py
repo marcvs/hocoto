@@ -310,7 +310,11 @@ class HomematicProfile():
                 if args.debug:
                     raise
         # print ("Listing all profiles read")
-        # for p in self.hm_day_profiles:
+        # make sure each profile is complete:
+        for p in self.hm_day_profiles:
+            for step in range (self.hm_day_profiles[p].steps_stored, 14):
+                # print (F"missing step: {step}")
+                self.hm_day_profiles[p].add_step(self.hm_day_profiles[p].temp[-1], 1440)
         #     print (p)
         # print ("done")
         # import json
