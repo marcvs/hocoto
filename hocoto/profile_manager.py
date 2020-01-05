@@ -117,7 +117,7 @@ if args.copy: # copy from one device to another
         # print (temp_profile.__repr_table__(days=args.today))
         print (temp_profile.__repr_plot__(days=args.today))
     # print (json.dumps(target_device_profile, sort_keys=True, indent=4, separators=(',', ': ')))
-    if (args.device == args.todev) and (args.fromday == args.today):
+    if (args.device == args.todev) and (args.fromday == args.today) and args.today is not None:
         print ("Cowardly refusing to use target with identical destination")
         exit (6)
     if not dry_run:
