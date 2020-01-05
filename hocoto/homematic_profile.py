@@ -158,12 +158,12 @@ class HomematicProfile():
                     return source_str[:pos]+insert_str+source_str[pos+length:]
                 tmp = self.hm_day_profiles[day].__repr_plot__(width = width)
                 tmplines = tmp.split('\n')
-                tmplines[2]=string_ins_replace(tmplines[2], "+------------+ ", 20, 41)
-                tmplines[3]=string_ins_replace(tmplines[3], "+            + ", 20, 43)
-                tmplines[4]=string_ins_replace(tmplines[4], "|  same as   |",  34, 80)
-                tmplines[5]=string_ins_replace(tmplines[5], "|  {: <10}|".format(dupe_name), 22, 40)
-                tmplines[6]=string_ins_replace(tmplines[6], "+            + ", 20, 45)
-                tmplines[7]=string_ins_replace(tmplines[7], "+------------+ ", 20, 45)
+                tmplines[0]=string_ins_replace(tmplines[0], "+------------+", 40, 74)
+                tmplines[1]=string_ins_replace(tmplines[1], "+            + ", 20, 43)
+                tmplines[2]=string_ins_replace(tmplines[2], "|  same as   |",  24, 34)
+                tmplines[3]=string_ins_replace(tmplines[3], "|  {: <10}|".format(dupe_name), 22, 40)
+                tmplines[4]=string_ins_replace(tmplines[4], "+            + ", 40, 73)
+                tmplines[5]=string_ins_replace(tmplines[5], "+------------+ ", 20, 45)
                 tmp = "\n".join (tmplines)
                 rv += tmp
 
