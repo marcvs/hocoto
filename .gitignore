@@ -1,3 +1,5 @@
 homematic_profile.db
 data
-homematic_profiler.log
+*.log
+*profile
+
