@@ -121,6 +121,38 @@ class HomematicProfile():
 
             rv += "\n"
         return rv
+    def __repr_table_dedup_all__(self, days=None):
+        '''Table view of the profile'''
+        rv = ''
+        alldays=[]
+        for day in self.hm_day_profiles:
+            alldays.append(day)
+            # print (F"aaaaaaaaaaaaaaaaaaa> {day}")
+            try:
+                daynames[day]
+            except KeyError:
+                daynames[day] = day
+        if days is not None:
+            days = ensure_is_list (days)
+        else:
+            days = weekdays
+        for day in alldays:
+            # day_num = weekdays.index(day)
+            day_num = alldays.index(day)
+            dupe_found = False
+            dupe_name = ""
+            for prev_day_num in range (0,day_num):
+                prev_day = alldays[prev_day_num]
+                if self.hm_day_profiles[day] == self.hm_day_profiles[prev_day]:
+                    dupe_found = True
+                    dupe_name  = prev_day
+                    break
+            rv += (F"{daynames[day]}\n")
+            if not dupe_found:
+                rv += self.hm_day_profiles[day].__repr_table__()
+            else:
+                rv += F"Same as {daynames[dupe_name]:<7}\n"
+        return rv
     def __repr_plot__(self, width=40, days=None):
         '''Table view of the profile'''
         rv = ''

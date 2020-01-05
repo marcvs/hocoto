@@ -43,19 +43,20 @@ except:
 ####################################################################################################
 # defaults:
 device_name = ""
+
+if not dry_run:
+    hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
+
 # Read data
 if args.readfromfile:
     hm_profile = HomematicProfile()
-    print(hm_profile.get_profilenames_from_file(args.readfromfile))
 
     # hm_day_profile = HomematicDayProfile()
     hm_profile.read_from_file(args.readfromfile)
     # print (hm_profile.__repr_table__())
-    print (hm_profile.__repr_tables_multi__())
-    device_name    = F'"Read from file "{args.readfromfile}"')
-    # exit (0)
+    # print (hm_profile.__repr_tables_multi__())
+    device_name    = F'Read from file "{args.readfromfile}"'
 elif not dry_run:
-    hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
     device_profile = hg.getParamset(args.device, 0, "MASTER")
     device_name    = hg.getName(args.device).lstrip('"').rstrip('"')
     hm_profile     = HomematicProfile(device_profile)
@@ -65,8 +66,6 @@ else:
     hm_profile     = HomematicProfile(device_profile)
 
 print (F" {device_name}\n"+("{:=^%d}"%(len(device_name)+2)).format(''))
-
-
 
 if args.dump: # raw dump
     # print (json.dumps(device_profile, sort_keys=True, indent=4, separators=(',', ': ')))
@@ -78,14 +77,11 @@ if args.table:
     print (hm_profile.__repr_tables_multi__())
 if args.table_dedup:
     print (hm_profile.__repr_table_dedup__())
-# print (hm_profile.__repr_plot__(width=args.width, days=args.day))
-if args.plot:
-    print (hm_profile.__repr_plots_multi__(width=args.width))
 if args.plot:
     print (hm_profile.__repr_plots_multi__(width=args.width))
 if args.writetofile:
     with open (args.writetofile, "w") as file:
-        file.write (hm_profile.__repr_table_dedup__())
+        file.write (hm_profile.__repr_table_dedup_all__())
     exit (0)
 
 if args.copy:
