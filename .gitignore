@@ -1,5 +1,7 @@
 homematic_profile.db
 data
 *.log
-
-.eggs Changelog hocoto.egg-info
+.eggs
+ChangeLog
+*.egg-info
+hocoto/__pycache__/
