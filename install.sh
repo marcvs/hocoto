@@ -9,7 +9,12 @@ test -z $PIP && {
     }
 }
 
-echo "pip: ${PIP}"
+
+echo "pip version used: ${PIP}"
+
+FULLNAME=`python3 setup.py --fullname`
+NAME=`python3 setup.py --name`
+
 
 
 # test -d dist && {
@@ -20,12 +25,11 @@ echo "pip: ${PIP}"
 echo "Building sdist"
 python3 setup.py sdist  > build.log 2>&1
 
-FULLNAME=`python3 setup.py --fullname`
-
 echo -e "Done building ${FULLNAME}\n"
 
-echo "Installing ${FULLNAME}"
+echo "Uninstalling old version of ${NAME}"
+${PIP} uninstall -y ${NAME}
 
+echo -e "\nInstalling ${FULLNAME}"
 ${PIP} install dist/${FULLNAME}*tar.gz
-
 
