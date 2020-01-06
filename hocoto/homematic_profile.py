@@ -161,8 +161,14 @@ class HomematicProfile():
         else:
             days = weekdays
         for day in days:
-            rv += F"{daynames[day]}\n"
-            rv += self.hm_day_profiles[day].__repr_plot__(width = width)
+            try:
+                rv += F"{daynames[day]}\n"
+            except KeyError:
+                pass
+            try:
+                rv += self.hm_day_profiles[day].__repr_plot__(width = width)
+            except KeyError:
+                rv += F'No Profile for "{day}"'
         return rv
     def __repr_plot_dedup__(self, width=40, days=None):
         '''Table view of the profile'''

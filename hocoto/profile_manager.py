@@ -59,6 +59,9 @@ def main():
         args.copy      = True
 
     elif not dry_run:
+        if not args.device:
+            print ("You should specify a device (or a file)")
+            eixt (3)
         device_profile = hg.getParamset(args.device, 0, "MASTER")
         device_name    = hg.getName(args.device).lstrip('"').rstrip('"')
         hm_profile     = HomematicProfile(device_profile)
@@ -80,7 +83,10 @@ def main():
     if args.table_dedup:
         print (hm_profile.__repr_table_dedup__())
     if args.plot:
-        print (hm_profile.__repr_plots_multi__(width=40))
+        if args.day:
+            print (hm_profile.__repr_plot__(width=40, days=args.day))
+        else:
+            print (hm_profile.__repr_plots_multi__(width=40))
     if args.writetofile:
         with open (args.writetofile, "w") as file:
             file.write (hm_profile.__repr_table_dedup_all__())
@@ -88,10 +94,8 @@ def main():
 
     if args.copy: # copy from one device to another
         if not args.todev:
-            if not args.device:
-                print ("Error, no device specified")
-                exit (2)
-            args.todev = args.device
+            print ("No device specified")
+            exit (2)
         if not dry_run:
             target_device_name = hg.getName(args.todev).lstrip('"').rstrip('"')
         else:

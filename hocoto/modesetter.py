@@ -64,7 +64,7 @@ def eventHandler(eventSource, peerId, channel, variableName, value):
     pass
 
 
-def main()
+def main():
     (args, parser) = parseOptions()
     hg = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
     MODES=[ 'AUTO_MODE' ,'MANU_MODE' ,'PARTY_MODE' ,'BOOST_MODE']
