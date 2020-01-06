@@ -22,7 +22,9 @@ python3 setup.py sdist  > build.log 2>&1
 
 FULLNAME=`python3 setup.py --fullname`
 
-echo -e "\nDone building ${FULLNAME}\n"
+echo -e "Done building ${FULLNAME}\n"
+
+echo "Installing ${FULLNAME}"
 
 ${PIP} install dist/${FULLNAME}*tar.gz
 
