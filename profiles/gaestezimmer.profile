@@ -14,7 +14,7 @@ Workday
 24:00 - 17.0°C
 
 Homeoffice
-=Workdday
+=Workday
 
 Weekend
  8:15 - 18.0°C
