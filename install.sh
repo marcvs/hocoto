@@ -1,7 +1,5 @@
 #!/bin/bash
 
-ETC_CONFIG=/etc/mqtt-to-influx
-
 PIP=`which pip3`
 test -z $PIP && {
     PIP=`which pip`
