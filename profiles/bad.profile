@@ -1,4 +1,4 @@
-MONDAY
+Workday
  5:00 - 17.0°C
  5:15 - 19.0°C
  5:20 - 19.5°C
@@ -13,19 +13,10 @@ MONDAY
 22:00 - 21.0°C
 24:00 - 17.0°C
 
-TUESDAY
-Same as Monday
+Homeoffice
+Same as Weekday
 
-WEDNESDAY
-Same as Monday
-
-THURSDAY
-Same as Monday
-
-FRIDAY
-Same as Monday
-
-SATURDAY
+Weekend
  8:15 - 17.0°C
  9:00 - 19.0°C
  9:10 - 19.5°C
@@ -39,6 +30,25 @@ SATURDAY
 19:00 - 20.5°C
 22:00 - 21.0°C
 24:00 - 17.0°C
+
+
+MONDAY
+Same as Workday
+
+TUESDAY
+Same as Workday
+
+WEDNESDAY
+Same as Workday
+
+THURSDAY
+Same as Workday
+
+FRIDAY
+Same as Workday
+
+SATURDAY
+Same as Weekend
 
 SUNDAY
 Same as SATURDAY
