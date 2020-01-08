@@ -194,23 +194,24 @@ class HomematicProfile():
             else:
                 def string_insert (source_str, insert_str, pos):
                     return source_str[:pos]+insert_str+source_str[pos:]
-                def string_ins_replace (source_str, insert_str, pos, length):
+                def string_ins_replace (source_str, insert_str, pos):
+                    length = len(insert_str)
                     return source_str[:pos]+insert_str+source_str[pos+length:]
                 tmp = self.hm_day_profiles[day].__repr_plot__(width = width)
                 tmplines = tmp.split('\n')
-                # tmplines[0]=string_ins_replace(tmplines[0], "+------------+", 40, 74)
-                # tmplines[1]=string_ins_replace(tmplines[1], "+            + ", 20, 43)
-                # tmplines[2]=string_ins_replace(tmplines[2], "|  same as   |",  24, 34)
-                # tmplines[3]=string_ins_replace(tmplines[3], "|  {: <10}|".format(dupe_name), 22, 40)
-                # tmplines[4]=string_ins_replace(tmplines[4], "+            + ", 40, 73)
-                # tmplines[5]=string_ins_replace(tmplines[5], "+------------+ ", 20, 45)
-                # tmplines[0]= ("+----------------------------------------+")
-                tmplines[0]= ("+{:-^%d}+"%width).format("-")
-                tmplines[1]= ("+{: ^%d}+"%width).format(" ")
-                tmplines[2]= ("|{: ^%d}|"%width).format("same as")
-                tmplines[3]= ("|{: ^%d}|"%width).format(dupe_name)
-                tmplines[4]= ("+{: ^%d}+"%width).format(" ")
-                tmplines[5]= ("+{:-^%d}+"%width).format("-")
+                linewidth = len(tmplines[1]) -2
+                # tmplines[2]=string_ins_replace(tmplines[2], "+------------+",  8)
+                # tmplines[3]=string_ins_replace(tmplines[3], "|            | ", 8)
+                # tmplines[4]=string_ins_replace(tmplines[4], "|  same as   | ", 8)
+                # tmplines[5]=string_ins_replace(tmplines[5], "|  {: <10}|".format(dupe_name), 8)
+                # tmplines[6]=string_ins_replace(tmplines[6], "|            | ", 8)
+                # tmplines[7]=string_ins_replace(tmplines[7], "+------------+ ", 8)
+                tmplines[0]= ("+{:-^%d}+"%linewidth).format("-")
+                tmplines[1]= ("+{: ^%d}+"%linewidth).format(" ")
+                tmplines[2]= ("|{: ^%d}|"%linewidth).format("same as")
+                tmplines[3]= ("|{: ^%d}|"%linewidth).format(dupe_name)
+                tmplines[4]= ("+{: ^%d}+"%linewidth).format(" ")
+                tmplines[5]= ("+{:-^%d}+"%linewidth).format("-")
                 tmp = "\n".join (tmplines)
                 rv += tmp
 
@@ -231,14 +232,15 @@ class HomematicProfile():
             plots[day] = self.__repr_plot_dedup__(width, days=day)
             lines[day] = plots[day].split('\n')
 
+        linewidth = len(lines[day][1]) 
+
         for blocks in range (0, blocks_to_plot*plots_per_row, plots_per_row+1):
             for i in range (blocks, blocks + plots_per_row + 1):
                 try:
-                    rv += (("   {:<%d}" % width).format(daynames[weekdays[i]]) )
+                    rv += (("{:^%d}  " % linewidth).format(daynames[weekdays[i]]) )
                 except IndexError:
                     pass
             rv += ('\n')
-            # for line in range (1, len(lines[weekdays[-1]])):
             for line in range (1, 16):
                 for i in range (blocks, blocks + plots_per_row + 1):
                     if i < len(lines):

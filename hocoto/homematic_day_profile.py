@@ -61,46 +61,85 @@ class HomematicDayProfile():
         if width < 40:
             n_time_axes = 360 # all xxx minutes
         residual = 0.99
+# Our data may look like this:
+# self.temp: [16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0, 20.5, 21.0, 17.5, 17.5, 17.5, 17.5]
+# self.time: [360,  361,  362,  363,  364,  485,  486,  487,  488,  489,  1440, 1440, 1440, 1440]
+
+        residual = 0.9
         for temp_int in range(220,159,-5):
-            cur_time_idx = 0
-            temp = temp_int/10.0
+            temp          = temp_int/10.0
+            hold_dot      = False
+            time_next     = False
+            previous_time = 0
+            minidots_ctr  = 0
+            # Y - Axis Numbers
             rv += ('{: <5}'.format(temp))
-
-            rv += ('|')
+            # Y - Axis ticks
             if (temp % 2 <= 0.1):
-                rv += ('\b+')
+                rv += ('+')
+            else:
+                rv += ('|')
+            # X - Axis Loop (time)
+            # for time in range (1, int(1440/time_divisor)):
+            for time in range (1, 1440):
+                # whether no make a plot decision
+                if time % time_divisor <= residual:
+                    make_dot = False
+                    # Determine whether or not to make a dot for the given time / temp
+                    for i in range (0,14):
+                        if self.time[i] > previous_time and self.time[i] <= time:
+                            try:
+                                if self.temp[i] == temp:
+                                    make_dot = True
+                                # Hold the dot, until the next endtime entry:
+                                if self.temp[i+1] == temp:
+                                    hold_dot = True
+                                else:
+                                    hold_dot = False
+                            except IndexError:
+                                pass
+                        else: # If we're before the first time step: Plt the first temperature
+                            if time < self.time[0]:
+                                if self.temp[0] == temp:
+                                    hold_dot = True
+                    if hold_dot:
+                        make_dot = True
 
-            for time in range (1, int(1440/time_divisor)):
-                dot_made = False
-                if self.temp[cur_time_idx] == temp:
-                    rv += ('*')
-                    dot_made = True
+                    if make_dot:
+                        minidots_ctr += 1
+                        rv += "*"
+                    else:
+                        minidots_ctr += 1
+                        if (temp % 2 <= 0.1) and (time % n_time_axes < time_divisor):
+                            rv += ('+')
+                        # elif (time % n_time_axes) <= residual:
+                        elif (time % n_time_axes) < time_divisor:
+                            rv += ('|')
+                        elif (temp % 2 <= 0.1):
+                            rv += ('-')
+                        else:
+                            if minidots_ctr % 2 == 0:
+                                rv += "·"
+                            else:
+                                rv += " "
+
+
+                    # Loop end: store previous time
+                    previous_time = time
+            rv += "|\n"
+        # X - Axis labels
+        rv += ('       ')
+        for time in range (1, 1440+1):
+            if time % time_divisor <= residual:
+                hours = int(time/60)
+                if (time % n_time_axes) < time_divisor:
+                    if hours > 9 and hours <= 12:
+                        rv += "\b"
+                    rv += (F"\b{hours:<2}")
+                    # rv += ("{:>2}".format(24))
+                    # rv += "I"
                 else:
-                    rv += (' ')
-                if self.time[cur_time_idx] < time*time_divisor:
-                    cur_time_idx += 1
-                if not dot_made:
-                    if (time-1) % (60/time_divisor) <= residual:
-                        rv += ('\b·')
-                    if (time) % (n_time_axes/time_divisor) <= residual:
-                        rv += ('\b|')
-                    if (temp % 2 <= 0.1):
-                        rv += ('\b-')
-                    if (temp % 2 == 0) and ((time) % (n_time_axes/time_divisor) <= residual):
-                        rv += ('\b+')
-            rv += ('|')
-            if (temp % 2 <= 0.1):
-                rv += ('\b+')
-
-            rv += ('\n')
-
-        rv += ('      ')
-        for time in range (1, int(1440/time_divisor)):
-            hours = int(time*time_divisor/60)
-            rv += (' ')
-            if (time) % (n_time_axes/time_divisor) <= residual:
-                rv += (F"\b\b{hours:>2}")
-        rv += ("\b{:>2}".format(24))
+                    rv += " "
         rv += ('\n')
         return rv
     # def __repr_dump__(self, day='mon'):

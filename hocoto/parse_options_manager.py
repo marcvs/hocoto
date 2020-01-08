@@ -52,7 +52,7 @@ def parseOptions():
     parser.add_argument('--todev',               type=int, default=0)
     parser.add_argument('--fromday',             type=str, default=None)
     parser.add_argument('--today',               choices = weekdays)
-    # parser.add_argument('--width',        '-w',  type=int, default=40)
+    parser.add_argument('--width',               type=int, default=40)
     parser.add_argument('--readfromfile', '-r',  default = None)
     parser.add_argument('--writetofile',  '-w',  default = None)
 

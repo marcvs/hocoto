@@ -84,9 +84,9 @@ def main():
         print (hm_profile.__repr_table_dedup__())
     if args.plot:
         if args.day:
-            print (hm_profile.__repr_plot__(width=40, days=args.day))
+            print (hm_profile.__repr_plot__(width=args.width, days=args.day))
         else:
-            print (hm_profile.__repr_plots_multi__(width=40))
+            print (hm_profile.__repr_plots_multi__(width=args.width))
     if args.writetofile:
         with open (args.writetofile, "w") as file:
             file.write (hm_profile.__repr_table_dedup_all__())
