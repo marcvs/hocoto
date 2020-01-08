@@ -5,3 +5,4 @@ data
 ChangeLog
 *.egg-info
 hocoto/__pycache__/
+dist
