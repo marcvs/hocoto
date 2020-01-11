@@ -87,8 +87,8 @@ class HomematicDayProfile():
                     make_dot = False
                     # Determine whether or not to make a dot for the given time / temp
                     for i in range (0,14):
-                        if self.time[i] > previous_time and self.time[i] <= time:
-                            try:
+                        try:
+                            if self.time[i] > previous_time and self.time[i] <= time:
                                 if self.temp[i] == temp:
                                     make_dot = True
                                 # Hold the dot, until the next endtime entry:
@@ -96,12 +96,12 @@ class HomematicDayProfile():
                                     hold_dot = True
                                 else:
                                     hold_dot = False
-                            except IndexError:
-                                pass
-                        else: # If we're before the first time step: Plt the first temperature
-                            if time < self.time[0]:
-                                if self.temp[0] == temp:
-                                    hold_dot = True
+                            else: # If we're before the first time step: Plt the first temperature
+                                if time < self.time[0]:
+                                    if self.temp[0] == temp:
+                                        hold_dot = True
+                        except IndexError:
+                            pass
                     if hold_dot:
                         make_dot = True
 
