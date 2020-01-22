@@ -12,6 +12,9 @@ Workday
 24:00 - 18.0°C
 
 Homeoffice
+=Workday
+
+Weekend
  4:50 - 18.0°C
  5:00 - 18.5°C
  5:20 - 19.0°C
@@ -21,9 +24,6 @@ Homeoffice
 17:00 - 21.0°C
 20:00 - 20.5°C
 24:00 - 18.0°C
-
-Weekend
-=Homeoffice
 
 MONDAY
 =Workday
