@@ -48,9 +48,8 @@ def main():
     if not dry_run:
         hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
 
-    # build a list of devicenames and use it to set the numeric value of device or todev, in case a
-    # name value was given:
-    
+    ####################
+    # Normalise device names:
     device_names = {}
     if not dry_run:
         for i in range (1, 10):
@@ -84,13 +83,11 @@ def main():
     if args.todev:
         args.todev = device_name_to_num(args.todev, device_names)
 
+    ####################
     # Read data
     if args.readfromfile:
         hm_profile = HomematicProfile()
-        # hm_day_profile = HomematicDayProfile()
         hm_profile.read_from_file(args.readfromfile)
-        # print (hm_profile.__repr_table__())
-        # print (hm_profile.__repr_tables_multi__())
         device_name    = F'File "{args.readfromfile}"'
         args.copy      = True
 
