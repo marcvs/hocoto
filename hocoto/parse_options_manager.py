@@ -53,8 +53,14 @@ def parseOptions():
     parser.add_argument('--fromday',             type=str, default=None)
     parser.add_argument('--today',               choices = weekdays)
     parser.add_argument('--width',               type=int, default=40)
+    parser.add_argument('--max_devices',         type=int, default=10)
+    parser.add_argument('--list',  '-l',         action='store_true',     default=False)
     parser.add_argument('--readfromfile', '-r',  default = None)
     parser.add_argument('--writetofile',  '-w',  default = None)
+    parser.add_argument('--inn', '--in', '-in',  default = None, help='''<type>:<value>', with
+            type_spec in 'file', 'dev', 'device' and value either a file name or a device name''')
+    parser.add_argument('--out', '-o',           default = None, help='''<type>:<value>', with
+            type_spec in 'file', 'dev', 'device' and value either a file name or a device name''')
 
     # args = parser.parse_args()
     # print(parser.format_values())
@@ -68,3 +74,32 @@ args = parseOptions().parse_args()
 if args.day:
     # if args.day not in weekdays:
         args.day = args.day.upper()
+
+# overwrite a couple of values, for the sake of a simplified usage:
+if args.inn:
+    if len(args.inn.split(":")) != 2:
+        print (F"Parameter --in malformed. Must be of form '<type>:<value>', was: {args.inn}")
+        exit (6)
+    try:
+        (type_spec, param_value) = args.inn.split(':')
+    except Exception as e:
+        print (F"Error: {e}")
+        raise
+    if type_spec in ('file'):
+        args.readfromfile = param_value
+    if type_spec in ('dev', 'device'):
+        args.device = param_value
+
+if args.out:
+    if len(args.out.split(":")) != 2:
+        print (F"Parameter --out malformed. Must be of form '<type>:<value>', was: {args.out}")
+        exit (7)
+    try:
+        (type_spec, param_value) = args.out.split(':')
+    except Exception as e:
+        print (F"Error: {e}")
+        raise
+    if type_spec in ('file'):
+        args.writetofile = param_value
+    if type_spec in ('dev', 'device'):
+        args.todev = param_value

@@ -14,6 +14,7 @@ import datetime
 import sqlite3
 import json
 import logging
+from sys import stdout
 from hocoto.parse_options_manager import args
 from hocoto.weekdays import weekdays, days, daynames
 from hocoto.fake_paramset import get_fake_paramset
@@ -51,15 +52,28 @@ def main():
     ####################
     # Normalise device names:
     device_names = {}
+    device_mode  = {}
+    device_temp  = {}
+    device_valv  = {}
+    device_bat   = {}
     if not dry_run:
-        for i in range (1, 10):
+        for i in range (1, args.max_devices):
             try:
                 device_names[i] = hg.getName(device).lstrip('"').rstrip('"')
+                # device_name[i]  = hg.getName(device).lstrip('"').rstrip('"')
+                device_mode[i]  = hg.getValue(device, 4, "CONTROL_MODE")
+                device_temp[i]  = hg.getValue(device, 4, "SET_TEMPERATURE")
+                device_valv[i]  = hg.getValue(device, 4, "VALVE_STATE" )
+                device_bat[i]   = hg.getValue(device, 4, "BATTERY_STATE")
             except: 
                 pass
     else:
         for i in range (1, 10):
                 device_names[i] = F"device_{i}"
+                device_mode[i]  = 1
+                device_temp[i]  = 2
+                device_valv[i]  = 3
+                device_bat[i]   = 4
         device_names[1] = "test"
 
     def device_name_to_num(dev_name_or_num, device_names):
@@ -84,11 +98,64 @@ def main():
         args.todev = device_name_to_num(args.todev, device_names)
 
     ####################
+    # list only  (taken from modesetter)
+    if args.list:
+        MODES=[ 'AUTO_MODE' ,'MANU_MODE' ,'PARTY_MODE' ,'BOOST_MODE']
+        print ("+-----+-----------------+------------+------+-------+------+-----------------------+")
+        print ("| Dev#|  Name           |  Mode      | Temp | Valve | Bat  |                       |")
+        print ("+-----+-----------------+------------+------+-------+------+-----------------------+")
+        for i in range (1, args.max_devices):
+            device = i
+            try:
+                name = device_names[i]
+                mode = device_mode[i] 
+                temp = device_temp[i] 
+                valv = device_valv[i] 
+                bat  = device_bat[i]  
+                comment = ""
+            except:
+                continue
+                pass
+
+            if device == args.device:
+                stdout.write ("|<<{:<^2} |".format(device))
+                comment = "Selected Input"
+            elif device == args.todev:
+                stdout.write ("|>>{:>^2} |".format(device))
+                comment = "Output"
+            else:
+                stdout.write ("|  {: ^2} |".format(device))
+            if mode != 2: # All modes but PARTY:
+                print(" {: <15} | {: <10} | {: <4} | {: >4}% | {: <4} | {: <21} |".\
+                        format(name, MODES[mode], temp, valv, bat, comment))
+            else: # PARTY
+                if not dry_run:
+                    party_temperature = hg.getValue(device, 4, 'PARTY_TEMPERATURE')
+                    ps_time           = hg.getValue(device, 4, 'PARTY_START_TIME')
+                    ps_day            = hg.getValue(device, 4, 'PARTY_START_DAY')
+                    ps_month          = hg.getValue(device, 4, 'PARTY_START_MONTH')
+                    ps_year           = hg.getValue(device, 4, 'PARTY_START_YEAR')
+                    px_time           = hg.getValue(device, 4, 'PARTY_STOP_TIME')
+                    px_day            = hg.getValue(device, 4, 'PARTY_STOP_DAY')
+                    px_month          = hg.getValue(device, 4, 'PARTY_STOP_MONTH')
+                    px_year           = hg.getValue(device, 4, 'PARTY_STOP_YEAR')
+
+                    ps_h = int(ps_time/60)
+                    ps_min = ps_time - ps_h * 60
+                    px_h = int(px_time/60)
+                    px_min = px_time - px_h * 60
+
+                    px_date = F"{px_day}.{px_month}.{px_year}"
+                    print(" {: <15} | {: <10} | {: <4} | {: >4}% | {: <4} | Until: {} {:0>2}:{:0<2} |"\
+                            .format(name, MODES[mode], temp, valv, bat, px_date, px_h, px_min))
+        print ("+-----+-----------------+------------+------+-------+------+-----------------------+\n")
+
+    ####################
     # Read data
     if args.readfromfile:
         hm_profile = HomematicProfile()
         hm_profile.read_from_file(args.readfromfile)
-        device_name    = F'File "{args.readfromfile}"'
+        device_name    = F'Input from file "{args.readfromfile}"'
         args.copy      = True
 
     elif not dry_run:
