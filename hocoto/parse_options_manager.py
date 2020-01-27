@@ -59,7 +59,7 @@ def parseOptions():
     parser.add_argument('--writetofile',  '-w',  default = None)
     parser.add_argument('--inn', '--in', '-in',  default = None, help='''<type>:<value>', with
             type_spec in 'file', 'dev', 'device' and value either a file name or a device name''')
-    parser.add_argument('--out', '-o',           default = None, help='''<type>:<value>', with
+    parser.add_argument('--out', '-o', '-out',   default = None, help='''<type>:<value>', with
             type_spec in 'file', 'dev', 'device' and value either a file name or a device name''')
 
     # args = parser.parse_args()
