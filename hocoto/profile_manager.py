@@ -48,6 +48,46 @@ def main():
     if not dry_run:
         hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
 
+    # build a list of devicenames and use it to set the numeric value of device or todev, in case a
+    # name value was given:
+    
+    device_names = {}
+    if not dry_run:
+        for i in range (1, 10):
+            try:
+                device_names[i] = hg.getName(device).lstrip('"').rstrip('"')
+            except: 
+                pass
+    else:
+        for i in range (1, 10):
+                device_names[i] = F"device_{i}"
+        device_names[1] = "test"
+
+    def device_name_to_num(dev_name_or_num, device_names):
+        '''return a numerical version of a device specification'''
+        try:
+            return int(dev_name_or_num)
+        except:
+            pass
+        if type(device_name) == type(""): # we have a named device, lets replace it with the correct number:
+            for cmplen in range (len(dev_name_or_num), 0, -1):
+                for (d_num, d_nam) in device_names.items():
+                    if dev_name_or_num[0:cmplen].lower() ==  d_nam[0:cmplen].lower():
+                        return (d_num)
+        print ("Unable to find specified device '{dev_name_or_num}'")
+        exit(5)
+        return (False)
+
+    if args.device:
+        args.device = device_name_to_num(args.device, device_names)
+        
+    if args.todev:
+        args.todev = device_name_to_num(args.todev, device_names)
+        print (F"TODEV: {args.todev}")
+
+    exit (0)
+
+
     # Read data
     if args.readfromfile:
         hm_profile = HomematicProfile()
@@ -94,7 +134,7 @@ def main():
 
     if args.copy: # copy from one device to another
         if not args.todev:
-            print ("No device specified")
+            print ("No target device specified")
             exit (2)
         if not dry_run:
             target_device_name = hg.getName(args.todev).lstrip('"').rstrip('"')
