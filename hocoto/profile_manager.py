@@ -56,8 +56,10 @@ def main():
     device_temp  = {}
     device_valv  = {}
     device_bat   = {}
+    print (F"dry run: {dry_run}")
     if not dry_run:
         for i in range (1, args.max_devices):
+            device = i
             try:
                 device_names[i] = hg.getName(device).lstrip('"').rstrip('"')
                 # device_name[i]  = hg.getName(device).lstrip('"').rstrip('"')
