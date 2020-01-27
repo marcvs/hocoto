@@ -83,10 +83,6 @@ def main():
         
     if args.todev:
         args.todev = device_name_to_num(args.todev, device_names)
-        print (F"TODEV: {args.todev}")
-
-    exit (0)
-
 
     # Read data
     if args.readfromfile:
