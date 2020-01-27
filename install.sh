@@ -31,5 +31,5 @@ echo "Uninstalling old version of ${NAME}"
 ${PIP} uninstall -y ${NAME}
 
 echo -e "\nInstalling ${FULLNAME}"
-${PIP} install dist/${FULLNAME}*tar.gz
+${PIP} install -U dist/${FULLNAME}*tar.gz
 
