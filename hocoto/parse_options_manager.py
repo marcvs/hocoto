@@ -72,8 +72,11 @@ args = parseOptions().parse_args()
 
 # pre process arguments:
 if args.day:
-    # if args.day not in weekdays:
         args.day = args.day.upper()
+if args.today:
+        args.today = args.today.upper()
+if args.fromday:
+        args.fromday = args.fromday.upper()
 
 # overwrite a couple of values, for the sake of a simplified usage:
 if args.inn:
