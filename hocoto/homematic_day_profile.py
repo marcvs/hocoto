@@ -126,7 +126,10 @@ class HomematicDayProfile():
 
                     # Loop end: store previous time
                     previous_time = time
-            rv += "|\n"
+            if temp in (22, 20, 18, 16):
+                rv += "+\n"
+            else:
+                rv += "|\n"
         # X - Axis labels
         rv += ('       ')
         for time in range (1, 1440+1):
