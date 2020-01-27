@@ -63,3 +63,8 @@ def parseOptions():
 
 # reparse args on import
 args = parseOptions().parse_args()
+
+# pre process arguments:
+if args.day:
+    # if args.day not in weekdays:
+        args.day = args.day.upper()

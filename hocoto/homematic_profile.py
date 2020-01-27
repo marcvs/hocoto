@@ -284,20 +284,22 @@ class HomematicProfile():
                     continue
                 elif re.match("[a-zA-Z\=]", line[0]):
                     if line[:7] ==  "Same as":
-                        same_as = line.split("Same as")[1].lstrip().rstrip()
+                        same_as = line.split("Same as")[1].lstrip().rstrip().upper()
                         # print (F"                    >>{same_as}<<")
                     elif line[0] == "=":
-                        same_as = line.split("=")[1].lstrip().rstrip()
+                        same_as = line.split("=")[1].lstrip().rstrip().upper()
                         # print (F"           ======   >>{same_as}<<")
                     elif "=" in line:
-                        name = line.split("=")[1].rstrip().lstrip()
+                        name = line.split("=")[1].rstrip().lstrip().upper()
                     else:
-                        name = line.rstrip().lstrip()
+                        name = line.rstrip().lstrip().upper()
                     if args.verbose:
                         print (F"\nProfilename: {name}")
                     current_profilename = name
-                    if current_profilename.upper() in shortnames:
-                            current_profilename = shortnames[current_profilename.upper()]
+                    if current_profilename in shortnames:
+                            current_profilename = shortnames[current_profilename]
+                    # if current_profilename.upper() in shortnames:
+                    #         current_profilename = shortnames[current_profilename.upper()]
                 elif line == "\n":
                     continue
                 else:

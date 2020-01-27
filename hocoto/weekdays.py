@@ -9,7 +9,8 @@
 
 import datetime
 
-weekdays              = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+# weekdays              = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+weekdays              = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 now = datetime.datetime.now()
 days = {'mon': 'MONDAY',
         'tue': 'TUESDAY',
@@ -21,22 +22,40 @@ days = {'mon': 'MONDAY',
         'tmp': 'WEEKDAY',
         'today': now.strftime("%A").upper() }
 
-daynames = {'mon': 'MONDAY',
-        'tue': 'TUESDAY',
-        'wed': 'WEDNESDAY',
-        'thu': 'THURSDAY',
-        'fri': 'FRIDAY',
-        'sat': 'SATURDAY',
-        'sun': 'SUNDAY',
-        'tmp': 'WEEKDAY'
+daynames = {'MON': 'MONDAY',
+        'TUE': 'TUESDAY',
+        'WED': 'WEDNESDAY',
+        'THU': 'THURSDAY',
+        'FRI': 'FRIDAY',
+        'SAT': 'SATURDAY',
+        'SUN': 'SUNDAY',
+        'TMP': 'WEEKDAY'
         }
+# daynames = {'mon': 'MONDAY',
+#         'tue': 'TUESDAY',
+#         'wed': 'WEDNESDAY',
+#         'thu': 'THURSDAY',
+#         'fri': 'FRIDAY',
+#         'sat': 'SATURDAY',
+#         'sun': 'SUNDAY',
+#         'tmp': 'WEEKDAY'
+#         }
 
 shortnames = {
-        'MONDAY'   : 'mon', 
-        'TUESDAY'  : 'tue', 
-        'WEDNESDAY': 'wed', 
-        'THURSDAY' : 'thu', 
-        'FRIDAY'   : 'fri', 
-        'SATURDAY' : 'sat', 
-        'SUNDAY'   : 'sun', 
+        'MONDAY'   : 'MON', 
+        'TUESDAY'  : 'TUE', 
+        'WEDNESDAY': 'WED', 
+        'THURSDAY' : 'THU', 
+        'FRIDAY'   : 'FRI', 
+        'SATURDAY' : 'SAT', 
+        'SUNDAY'   : 'SUN', 
         }
+# shortnames = {
+#         'MONDAY'   : 'mon',
+#         'TUESDAY'  : 'tue',
+#         'WEDNESDAY': 'wed',
+#         'THURSDAY' : 'thu',
+#         'FRIDAY'   : 'fri',
+#         'SATURDAY' : 'sat',
+#         'SUNDAY'   : 'sun',
+#         }
