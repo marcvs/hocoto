@@ -16,7 +16,7 @@ Control Homematic Thermostats from the commandline.
 
 ## Plotting
 ```
-$ ./profile_manager.py -in dev:test -p --day mon
+$ ./hocoto -in dev:test -p --day mon
  testing
 =========
 MONDAY
@@ -39,7 +39,7 @@ MONDAY
 ## Tables
 ```
 
-$ ./profile_manager.py -in dev:test --table --day mon
+$ ./hocoto -in dev:test --table --day mon
  testing
 =========
 MONDAY         | TUESDAY        | WEDNESDAY      | THURSDAY       | FRIDAY         | SATURDAY       | SUNDAY         | 
@@ -53,7 +53,7 @@ MONDAY         | TUESDAY        | WEDNESDAY      | THURSDAY       | FRIDAY      
 
 ## File ouptput:
 ```
-$ ./profile_manager.py -in dev:test --out file:delme
+$ ./hocoto -in dev:test --out file:delme
  testing
 =========
 
@@ -81,7 +81,7 @@ Same as MONDAY
 
 ## Apply profile for whole week:
 ```
-$ ./profile_manager.py -in file:delme -o dev:test
+$ ./hocoto -in file:delme -o dev:test
  Input from file "delme"
 =========================
 Copying from Input from file "delme" to Testing-Target
@@ -128,13 +128,13 @@ SATURDAY
 SUNDAY
 Same as  saturday
 
-./profile_manager.py -in file:delme -o dev:test
+./hocoto -in file:delme -o dev:test
 ```
 
 ## Use profiles for specific dasy:
 
 ```
-./profile_manager.py -in file:delme -o dev:test -p --day weekend --today MON
+./hocoto -in file:delme -o dev:test -p --day weekend --today MON
 ```
 
 
