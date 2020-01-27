@@ -134,7 +134,7 @@ Same as  saturday
 ## Use profiles for specific dasy:
 
 ```
-./hocoto -in file:delme -o dev:test -p --day weekend --today MON
+./hocoto -in file:delme -out dev:test -p --fromday weekend --today MON
 ```
 
 
