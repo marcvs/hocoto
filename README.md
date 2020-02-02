@@ -12,6 +12,12 @@ Control Homematic Thermostats from the commandline.
 - Copy profiles between devices
 - Offline capability
 
+# Installation
+
+```
+pip install hocoto
+```
+
 # Examples:
 
 ## Plotting
