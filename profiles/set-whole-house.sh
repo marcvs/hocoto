@@ -3,7 +3,7 @@
 SET_PROFILE=$1
 SET_DAY=$2
 
-PROFILE_MANAGER=hocoto_manager
+PROFILE_MANAGER=hocoto
 PROFILE_DIR=./
 
 $PROFILE_MANAGER --todev 1 -r $PROFILE_DIR/entkleide.profile     --fromday $SET_PROFILE --today $SET_DAY
