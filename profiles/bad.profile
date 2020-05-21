@@ -31,6 +31,8 @@ Weekend
 22:00 - 21.0°C
 24:00 - 17.0°C
 
+Summer
+24:00 - 17.0°C
 
 MONDAY
 Same as Workday

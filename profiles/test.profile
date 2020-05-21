@@ -22,6 +22,9 @@ Homeoffice
 21:20 - 20.5°C
 24:00 - 18.0°C
 
+Summer
+24:00 - 17.0°C
+
 Weekend
 =Homeoffice
 

@@ -31,6 +31,8 @@ Weekend
 17:00 - 20.5°C
 24:00 - 21.0°C
 
+Summer
+24:00 - 17.0°C
 
 MONDAY
 =Workday
