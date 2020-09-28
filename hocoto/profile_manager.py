@@ -48,6 +48,8 @@ def main():
 
     if not dry_run:
         hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
+        
+    MODES=[ 'AUTO_MODE' ,'MANU_MODE' ,'PARTY_MODE' ,'BOOST_MODE']
 
     ####################
     # Normalise device names:
@@ -56,7 +58,6 @@ def main():
     device_temp  = {}
     device_valv  = {}
     device_bat   = {}
-    print (F"dry run: {dry_run}")
     if not dry_run:
         for i in range (1, args.max_devices):
             device = i
@@ -99,10 +100,25 @@ def main():
     if args.todev:
         args.todev = device_name_to_num(args.todev, device_names)
 
+    if args.temp: 
+        if not args.device:
+            print ("Device not specified device")
+            exit(6)
+            return (False)
+        hg.setValue(args.device, 4, "SET_TEMPERATURE", args.temp)
+
+    if args.mode:
+        if not args.device:
+            print ("Device not specified device")
+            exit(6)
+            return (False)
+        hg.setValue(args.device, 4, MODES[args.mode], True)
+        device_mode[args.device]  = hg.getValue(args.device, 4, "CONTROL_MODE")
+        args.list = True
+
     ####################
     # list only  (taken from modesetter)
     if args.list:
-        MODES=[ 'AUTO_MODE' ,'MANU_MODE' ,'PARTY_MODE' ,'BOOST_MODE']
         print ("+-----+-----------------+------------+------+-------+------+-----------------------+")
         print ("| Dev#|  Name           |  Mode      | Temp | Valve | Bat  |                       |")
         print ("+-----+-----------------+------------+------+-------+------+-----------------------+")

@@ -57,10 +57,14 @@ def parseOptions():
     parser.add_argument('--list',  '-l',         action='store_true',     default=False)
     parser.add_argument('--readfromfile', '-r',  default = None)
     parser.add_argument('--writetofile',  '-w',  default = None)
+    parser.add_argument('--temp',                type=float, default=None)
     parser.add_argument('--inn', '--in', '-in',  default = None, help='''<type>:<value>', with
             type_spec in 'file', 'dev', 'device' and value either a file name or a device name''')
     parser.add_argument('--out', '-o', '-out',   default = None, help='''<type>:<value>', with
             type_spec in 'file', 'dev', 'device' and value either a file name or a device name''')
+    parser.add_argument('--mode',       '-m',
+        help="0:AUTO-MODE, 1:MANU-MODE,  2:PARTY-MODE, 3:BOOST-MODE",
+        type=int, default=None)
 
     # args = parser.parse_args()
     # print(parser.format_values())
