@@ -35,16 +35,16 @@ Summer
 24:00 - 17.0°C
 
 MONDAY
-=Workday
+=Homeoffice
 
 TUESDAY
-=Workday
+=Homeoffice
 
 WEDNESDAY
 =Homeoffice
 
 THURSDAY
-=Workday
+=Homeoffice
 
 FRIDAY
 =Homeoffice

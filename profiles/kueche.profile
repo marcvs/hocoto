@@ -19,9 +19,9 @@ Homeoffice
  5:20 - 19.0°C
  5:25 - 19.5°C
  5:30 - 20.0°C
- 9:00 - 20.5°C
-15:30 - 19.0°C
-15:40 - 19.5°C
+ #9:00 - 20.5°C
+#15:30 - 19.0°C
+#15:40 - 19.5°C
 15:50 - 20.0°C
 23:00 - 20.5°C
 24:00 - 17.0°C
@@ -39,16 +39,16 @@ Summer
 24:00 - 17.0°C
 
 MONDAY
-=Workday
+=Homeoffice
 
 TUESDAY
-=Workday
+=Homeoffice
 
 WEDNESDAY
 =Homeoffice
 
 THURSDAY
-=Workday
+=Homeoffice
 
 FRIDAY
 =Homeoffice
