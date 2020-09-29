@@ -50,6 +50,17 @@ def main():
         hg             = Homegear("/var/run/homegear/homegearIPC.sock", eventHandler)
         
     MODES=[ 'AUTO_MODE' ,'MANU_MODE' ,'PARTY_MODE' ,'BOOST_MODE']
+    FAULTS= [ 'NO_FAULT', 'VALVE_TIGHT', 'ADJUSTING_RANGE_TOO_LARGE', 
+            'ADJUSTING_RANGE_TOO_SMALL', 'COMMUNICATION_ERROR', 
+            'UNDFINED', 'LOWBAT', 'VALVE_ERROR_POSITION']
+# 0 = NO_FAULT (Standard)
+# 1 = VALVE_TIGHT
+# 2 = ADJUSTING_RANGE_TOO_LARGE
+# 3 = ADJUSTING_RANGE_TOO_SMALL
+# 4 = COMMUNICATION_ERROR
+# 5 = UNDFINED
+# 6 = LOWBAT
+# 7 = VALVE_ERROR_POSITION
 
     ####################
     # Normalise device names:
@@ -58,6 +69,7 @@ def main():
     device_temp  = {}
     device_valv  = {}
     device_bat   = {}
+    device_fault = {}
     if not dry_run:
         for i in range (1, args.max_devices):
             device = i
@@ -68,6 +80,7 @@ def main():
                 device_temp[i]  = hg.getValue(device, 4, "SET_TEMPERATURE")
                 device_valv[i]  = hg.getValue(device, 4, "VALVE_STATE" )
                 device_bat[i]   = hg.getValue(device, 4, "BATTERY_STATE")
+                device_fault[i] = hg.getValue(device, 4, "FAULT_REPORTING")
             except: 
                 pass
     else:
@@ -77,6 +90,7 @@ def main():
                 device_temp[i]  = 2
                 device_valv[i]  = 3
                 device_bat[i]   = 4
+                device_fault[i] = 5
         device_names[1] = "test"
 
     def device_name_to_num(dev_name_or_num, device_names):
@@ -107,7 +121,7 @@ def main():
             return (False)
         hg.setValue(args.device, 4, "SET_TEMPERATURE", args.temp)
 
-    if args.mode:
+    if args.mode is not None:
         if not args.device:
             print ("Device not specified device")
             exit(6)
@@ -119,18 +133,21 @@ def main():
     ####################
     # list only  (taken from modesetter)
     if args.list:
-        print ("+-----+-----------------+------------+------+-------+------+-----------------------+")
-        print ("| Dev#|  Name           |  Mode      | Temp | Valve | Bat  |                       |")
-        print ("+-----+-----------------+------------+------+-------+------+-----------------------+")
+        print ("+-----+-----------------+------------+------+-------+------+---------------------------+")
+        print ("| Dev#|  Name           |  Mode      | Temp | Valve | Bat  |                           |")
+        print ("+-----+-----------------+------------+------+-------+------+---------------------------+")
         for i in range (1, args.max_devices):
             device = i
             try:
-                name = device_names[i]
-                mode = device_mode[i] 
-                temp = device_temp[i] 
-                valv = device_valv[i] 
-                bat  = device_bat[i]  
+                name    = device_names[i]
+                mode    = device_mode[i]
+                temp    = device_temp[i]
+                valv    = device_valv[i]
+                bat     = device_bat[i]
                 comment = ""
+                fault   = device_fault[i]
+                if fault != 0:
+                    comment = F"{FAULTS[fault]}"
             except:
                 continue
                 pass
@@ -144,7 +161,7 @@ def main():
             else:
                 stdout.write ("|  {: ^2} |".format(device))
             if mode != 2: # All modes but PARTY:
-                print(" {: <15} | {: <10} | {: <4} | {: >4}% | {: <4} | {: <21} |".\
+                print(" {: <15} | {: <10} | {: <4} | {: >4}% | {: <4} | {: <25} |".\
                         format(name, MODES[mode], temp, valv, bat, comment))
             else: # PARTY
                 if not dry_run:
@@ -166,7 +183,7 @@ def main():
                     px_date = F"{px_day}.{px_month}.{px_year}"
                     print(" {: <15} | {: <10} | {: <4} | {: >4}% | {: <4} | Until: {} {:0>2}:{:0<2} |"\
                             .format(name, MODES[mode], temp, valv, bat, px_date, px_h, px_min))
-        print ("+-----+-----------------+------------+------+-------+------+-----------------------+\n")
+        print ("+-----+-----------------+------------+------+-------+------+---------------------------+\n")
 
     ####################
     # Read data
