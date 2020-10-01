@@ -195,8 +195,9 @@ def main():
 
     elif not dry_run:
         if not args.device:
-            print ("You should specify a device (or a file)")
-            exit (3)
+            # print ("You should specify a device (or a file)")
+            # without a device specified there's not more we can do here
+            exit (0)
         device_profile = hg.getParamset(args.device, 0, "MASTER")
         device_name    = hg.getName(args.device).lstrip('"').rstrip('"')
         hm_profile     = HomematicProfile(device_profile)
