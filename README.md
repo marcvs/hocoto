@@ -4,7 +4,7 @@ Control Homematic Thermostats from the commandline.
 
 # Features:
 - Visualisation: Output device status as a graph or table
-- Save device status into an easily reasable table
+- Save device status into an easily reusable table
 - Read from tables and write to devices
 - Specify multiple profiles in a table
 - Assign profiles per day (templating)
@@ -137,7 +137,7 @@ Same as  saturday
 ./hocoto -in file:delme -o dev:test
 ```
 
-## Use profiles for specific dasy:
+## Use profiles for specific days:
 
 ```
 ./hocoto -in file:delme -out dev:test -p --fromday weekend --today MON
